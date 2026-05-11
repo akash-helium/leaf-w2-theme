@@ -1,0 +1,202 @@
+{%- comment -%}
+  Color Swatch Pills Snippet (Redesigned - Rounded Square with Selected Ring)
+{%- endcomment -%}
+
+{%- assign max_visible = 4 -%}
+{%- assign current_option_index = option.position -%}
+{%- assign option_index = current_option_index | minus: 1 -%}
+
+<div class="ColorSwatchContainer" data-option-index="{{ current_option_index }}">
+  
+  <span class="ColorSwatch__Label Heading Text--subdued u-h6">
+    {{ option.name }}: 
+    <span class="ColorSwatch__CurrentValue" id="ColorValue-{{ section.id }}-{{ current_option_index }}">
+      {{ option.selected_value }}
+    </span>
+  </span>
+
+  <ul class="ColorSwatchList HorizontalList">
+    {%- for value in option.values -%}
+
+      {%- assign is_selected = false -%}
+      {%- if value == option.selected_value -%}
+        {%- assign is_selected = true -%}
+      {%- endif -%}
+
+      {%- if forloop.index <= max_visible -%}
+        <li class="HorizontalList__Item">
+
+          {%- assign input_id = 'swatch-' | append: section.id | append: '-' | append: current_option_index | append: '-' | append: forloop.index -%}
+
+          {%- assign swatch_color = blank -%}
+          {%- assign swatch_image = blank -%}
+
+          {%- for variant in product.variants -%}
+            {%- assign option_value = variant.options[option_index] -%}
+
+            {%- if option_value == value -%}
+
+              {%- if variant.image -%}
+                {%- assign swatch_image = variant.image | image_url: width: 100 -%}
+              {%- endif -%}
+
+              {%- if variant.metafields.custom.variant_color -%}
+                {%- assign swatch_color = variant.metafields.custom.variant_color -%}
+              {%- endif -%}
+
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if swatch_color == blank and swatch_image == blank -%}
+            {%- assign swatch_color = '#cccccc' -%}
+          {%- endif -%}
+
+          <input type="radio" 
+                 id="{{ input_id }}" 
+                 name="option-{{ option_index }}" 
+                 value="{{ value | escape }}" 
+                 class="ColorSwatch__Radio"
+                 {% if is_selected %}checked="checked"{% endif %}
+                 data-option-position="{{ current_option_index }}">
+
+          <label for="{{ input_id }}" 
+                 class="ColorSwatch {% if is_selected %}is-active{% endif %}" 
+                 title="{{ value | escape }}"
+                 style="
+                   {% if swatch_image != blank %}
+                     background-image: url({{ swatch_image }});
+                     background-size: cover;
+                     background-position: center;
+                   {% else %}
+                     background-color: {{ swatch_color }};
+                   {% endif %}
+                 ">
+          </label>
+
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if option.values.size > max_visible -%}
+      <li class="HorizontalList__Item">
+        <span class="ColorSwatch__MoreText">
+          +{{ option.values.size | minus: max_visible }}
+        </span>
+      </li>
+    {%- endif -%}
+
+  </ul>
+</div>
+
+<style>
+.ColorSwatchContainer {
+  margin: 15px 0 25px;
+}
+.ColorSwatch::after{
+display:none !important;
+}
+
+.ColorSwatch__Label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.ColorSwatch__CurrentValue {
+  font-weight: 400;
+  color: #707070;
+  margin-left: 5px;
+  text-transform: none;
+}
+
+.ColorSwatchList {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hidden radio input */
+.ColorSwatch__Radio {
+  display: none;
+}
+
+
+/* Base swatch — rounded square */
+.ColorSwatch {
+  position: relative;
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* Hover — subtle lift */
+.ColorSwatch:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Selected state — outer ring using box-shadow */
+.ColorSwatch.is-active {
+  border-color: transparent;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #1c2d44;
+}
+
+.ColorSwatch.is-active:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #1c2d44,
+    0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* +N more text */
+.ColorSwatch__MoreText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  margin-left: 2px;
+}
+
+
+</style>
+
+<script>
+(function() {
+  function initColorSwatches() {
+    const swatches = document.querySelectorAll('.ColorSwatch__Radio');
+
+    swatches.forEach(radio => {
+      radio.addEventListener('change', function() {
+        const value = this.value;
+        const pos = this.getAttribute('data-option-position');
+
+        const label = document.getElementById(`ColorValue-{{ section.id }}-${pos}`);
+        if (label) label.textContent = value;
+
+        const container = this.closest('.ColorSwatchList');
+        container.querySelectorAll('.ColorSwatch').forEach(sw => sw.classList.remove('is-active'));
+
+        const activeLabel = container.querySelector(`label[for="${this.id}"]`);
+        if (activeLabel) activeLabel.classList.add('is-active');
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initColorSwatches);
+  document.documentElement.addEventListener('product:variant-changed', initColorSwatches);
+})();
+</script>

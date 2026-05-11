@@ -1,0 +1,276 @@
+{%- liquid
+  assign speed = section.settings.speed
+  assign gap = section.settings.gap
+  assign pause_on_hover = section.settings.pause_on_hover
+  assign edge_fade_width = section.settings.edge_fade_width
+  assign section_heading = section.settings.heading
+  assign heading_alignment = section.settings.heading_alignment
+  assign scroll_direction = section.settings.scroll_direction
+-%}
+
+<div
+  class="image-marquee-section"
+  data-section-id="{{ section.id }}"
+  style="
+    --marquee-duration: {{ speed }}s;
+    --marquee-gap: {{ gap }}px;
+    --marquee-fade-width: {{ edge_fade_width }}px;
+    --marquee-animation: marquee-scroll-{{ scroll_direction }};
+  "
+>
+  {%- if section_heading != blank -%}
+    <div class="marquee-heading-wrapper text-align--{{ heading_alignment }}">
+      <h2 class="marquee-heading">{{ section_heading | escape }}</h2>
+    </div>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="marquee-wrapper {% if pause_on_hover %}pause-on-hover{% endif %}">
+      <div class="marquee-track">
+        {%- comment %}
+          The content is duplicated multiple times to ensure the track is always wider
+          than the screen, which is essential for a seamless loop.
+        {% endcomment %}
+        {%- for i in (1..5) -%}
+          {%- for block in section.blocks -%}
+            <div class="marquee-item" {% if i > 1 %}aria-hidden="true"{% endif %} {{ block.shopify_attributes }}>
+              {%- assign image = block.settings.image -%}
+              {%- assign link = block.settings.link -%}
+              {%- if link != blank -%}
+                <a href="{{ link }}" class="marquee-link" {% if i > 1 %}tabindex="-1"{% endif %}>
+              {%- else -%}
+                <div class="marquee-link">
+              {%- endif -%}
+                {%- if image != blank -%}
+                  <img
+                    src="{{ image | image_url: height: 200 }}"
+                    alt="{{ image.alt | escape }}"
+                    height="{{ image.height }}"
+                    width="{{ image.width }}"
+                    loading="lazy"
+                    class="marquee-image"
+                  >
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+              {%- if link != blank -%}
+                </a>
+              {%- else -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  .image-marquee-section {
+    width: 100%;
+    padding: 40px 0;
+    overflow-x: clip; /* Use clip to prevent scrollbars */
+  }
+  .marquee-heading-wrapper {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+  }
+  .marquee-heading {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .text-align--left { text-align: left; }
+  .text-align--center { text-align: center; }
+  .text-align--right { text-align: right; }
+  .marquee-wrapper {
+    display: flex;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+    width: 100%;
+  }
+  .marquee-track {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    animation: var(--marquee-animation) var(--marquee-duration) linear infinite;
+    width: max-content;
+  }
+  .marquee-wrapper.pause-on-hover:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  .marquee-item {
+    flex-shrink: 0;
+    padding: 0 calc(var(--marquee-gap) / 2);
+  }
+  .marquee-link {
+    display: block;
+  }
+  .marquee-image {
+    max-height: 80px;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+  .marquee-link:hover .marquee-image {
+    opacity: 1;
+  }
+  .placeholder-svg {
+    height: 80px;
+    width: 150px;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+  }
+  
+  @keyframes marquee-scroll-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-20%); } /* Matches 1/5th of the duplicated content */
+  }
+  @keyframes marquee-scroll-right {
+    from { transform: translateX(-20%); } /* Starts from the end */
+    to { transform: translateX(0); } /* Moves to the start */
+  }
+
+  @media (min-width: 768px) {
+    .marquee-heading-wrapper {
+      padding: 0 40px;
+    }
+    .image-marquee-section .marquee-wrapper {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black var(--marquee-fade-width), black calc(100% - var(--marquee-fade-width)), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, black var(--marquee-fade-width), black calc(100% - var(--marquee-fade-width)), transparent 100%);
+    }
+    .marquee-image {
+      max-height: 100px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Image Marquee",
+  "tag": "section",
+  "class": "section-image-marquee",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Partners"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Marquee Settings"
+    },
+    {
+      "type": "select",
+      "id": "scroll_direction",
+      "label": "Scroll Direction",
+      "options": [
+        { "value": "left", "label": "Scroll Left" },
+        { "value": "right", "label": "Scroll Right" }
+      ],
+      "default": "left",
+      "info": "'Scroll Left' means content will enter from the right side of the screen."
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "s",
+      "label": "Animation Duration",
+      "info": "Higher numbers mean a slower scroll speed.",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 20,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Space between images",
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause scrolling on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Desktop Styling"
+    },
+    {
+      "type": "range",
+      "id": "edge_fade_width",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Edge Fade Width",
+      "info": "The width of the fade effect on the left and right edges. Only applies to desktop.",
+      "default": 100
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_block",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Marquee",
+      "blocks": [
+        { "type": "image_block" },
+        { "type": "image_block" },
+        { "type": "image_block" },
+        { "type": "image_block" },
+        { "type": "image_block" },
+        { "type": "image_block" }
+      ]
+    }
+  ]
+}
+{% endschema %}

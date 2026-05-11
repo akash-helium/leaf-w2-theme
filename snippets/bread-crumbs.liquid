@@ -1,0 +1,65 @@
+
+{% assign current_page_title = 'Shop' %}
+
+{% if collection %}
+  {% assign current_page_title = collection.title %}
+
+{% elsif page and page.title %}
+  {% assign current_page_title = page.title %}
+{% endif %}
+
+<nav class="breadcrumb-component" aria-label="breadcrumbs">
+  <ol class="breadcrumb-component__list">
+    <li class="breadcrumb-component__list-item">
+      <a href="{{ routes.root_url }}" class="breadcrumb-component__link">Home</a>
+    </li>
+    <li class="breadcrumb-component__list-item">
+      <span class="breadcrumb-component__separator">/</span>
+      <span class="breadcrumb-component__current">{{ current_page_title }}</span>
+    </li>
+  </ol>
+</nav>
+
+<style>
+  .breadcrumb-component {
+    padding: 0 15px; /* Adjust horizontal padding as needed */
+  }
+
+  .breadcrumb-component__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    font-size: 16px; /* Adjust font size as needed */
+    color: #888; /* Grey for path */
+  }
+
+  .breadcrumb-component__list-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .breadcrumb-component__link {
+    text-decoration: none;
+    color: #888;
+  }
+
+  .breadcrumb-component__link:hover {
+    text-decoration: underline;
+  }
+
+  .breadcrumb-component__separator {
+    margin: 0 8px; /* Spacing around separator */
+    color: #ccc; /* Lighter grey for separator */
+  }
+
+  .breadcrumb-component__current {
+    color: #333; /* Darker for current page, matching image */
+    font-weight: normal; /* As seen in image */
+  }
+  @media screen and (max-width: 767px){
+  .breadcrumb-component{
+  display:none;
+  }
+}
+</style>

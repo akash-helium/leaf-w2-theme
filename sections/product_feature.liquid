@@ -1,0 +1,298 @@
+<style>
+  .product-callout-section {
+    position: relative;
+    width: 95%;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+    border-radius: 20px;
+    margin: 0 auto;
+    background-color: #000;
+  }
+
+  .product-callout-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+    background-attachment: fixed;
+  }
+  
+  @keyframes cardEntrance {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -40%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .product-callout-card-wrapper {
+    position: absolute;
+    z-index: 2;
+    width: auto;
+    max-width: 480px;
+
+    /* MATCH review-card background style */
+    background-color: var(--brand-bg-muted, #f9f9f9);
+    color: var(--brand-primary-color-font-body, #333333);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid var(--brand-border-muted, #e0e0e0);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+
+    padding: 34px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    min-height: 110px;
+    top: 48%;
+    left: 35%;
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.95);
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  }
+
+  .product-callout-card-wrapper.animate-in {
+    animation: cardEntrance 0.7s ease-out forwards;
+  }
+
+  .product-callout-card-wrapper:hover {
+    transform: translate(-50%, -50%) scale(1.02);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .product-card-image-container {
+    flex-shrink: 0;
+    width: 75px;
+    height: 75px;
+    overflow: hidden;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .product-callout-card-image {
+    object-fit: contain;
+    display: block;
+    border-radius: 12px;
+    transition: transform 0.3s ease-out;
+  }
+
+  .product-callout-card-image:hover {
+    transform: scale(1.1);
+  }
+
+  .product-callout-card-details {
+    flex-grow: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 75px;
+  }
+
+  .product-callout-card-price {
+    font-size: 0.9em;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .product-callout-card-title {
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 6px;
+    color: var(--brand-primary-color-font-heading, #000);
+    line-height: 1.3;
+  }
+  
+  .product-callout-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9em;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .product-callout-button:hover {
+    background-color: #333;
+    transform: scale(1.05);
+  }
+
+  .product-callout-line {
+    display: none;
+  }
+
+  /* --- FULLY REVISED MOBILE VIEW --- */
+  @media (max-width: 768px) {
+    .product-callout-section {
+      width: 100%;
+      border-radius: 0;
+      height: 50vh;
+    }
+
+    .product-callout-background {
+      background-attachment: fixed;
+    }
+
+    .product-callout-card-wrapper {
+      width: 90%;
+      top:25%;
+      left:50%;
+      padding: 16px;
+      gap: 15px;
+      flex-direction: row;
+      align-items: center;
+    }
+    
+    @keyframes cardEntrance-mobile {
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .product-callout-card-wrapper.animate-in {
+      animation: cardEntrance-mobile 0.6s ease-out forwards;
+    }
+    
+    .product-callout-card-wrapper:hover {
+      transform: translateX(-50%) scale(1.02);
+    }
+
+    .product-card-image-container {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+    
+    .product-callout-card-details {
+      min-height: auto;
+      text-align: left;
+    }
+    
+    .product-callout-card-price {
+      font-size: 0.85em;
+    }
+
+    .product-callout-card-title {
+      font-size: 0.95em;
+      line-height: 1.2;
+    }
+
+    .product-callout-button {
+      font-size: 0.9em;
+      padding: 8px 14px;
+      margin-top: 8px;
+    }
+  }
+</style>
+
+<div class="product-callout-section">
+  {% if section.settings.background_image != blank %}
+    <div class="product-callout-background"
+         style="background-image: url({{ section.settings.background_image | image_url: width: 1920 }});">
+    </div>
+  {% else %}
+    <div class="product-callout-background" style="background-color: #000;"></div>
+  {% endif %}
+
+  {% assign product = section.settings.featured_product %}
+  {% if product != blank %}
+    <div class="product-callout-card-wrapper">
+      <div class="product-card-image-container">
+        <img
+          src="{{ product.featured_media | image_url: width: 150 }}"
+          alt="{{ product.featured_media.alt | escape }}"
+          loading="lazy"
+          class="product-callout-card-image"
+        >
+      </div>
+      <div class="product-callout-card-details">
+        <div class="product-callout-card-price">
+          From {{ product.price | money }}
+        </div>
+        {% assign title_parts = product.title | split: '(' %}
+        <h3 class="product-callout-card-title">
+          {{ title_parts[0] | strip }}
+          {% if product.variants.size == 1 and product.variants.first.title contains 'Carbon Black' %}
+            (Carbon Black)
+          {% endif %}
+        </h3>
+        <a href="{{ product.url }}" class="product-callout-button">Shop Now</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="product-callout-card-wrapper">
+      <p>Please select a product in the section settings.</p>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Feature",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "Featured Product"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Callout",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const section = document.querySelector('.product-callout-section');
+    if (!section) return;
+
+    const cardWrapper = section.querySelector('.product-callout-card-wrapper');
+    if (!cardWrapper) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observerCallback = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          cardWrapper.classList.add('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    observer.observe(section);
+  });
+</script>

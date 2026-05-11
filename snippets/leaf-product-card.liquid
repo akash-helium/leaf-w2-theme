@@ -1,0 +1,90 @@
+{%- assign is_video_metafield = product.metafields.custom.is_video.value -%}
+{%- assign video_media_object = product.metafields.custom.url_video.value -%}
+{%- assign render_this_product = false -%}
+
+{%- if is_video_metafield and video_media_object -%}
+  {%- if video_media_object.media_type == 'video' or video_media_object.media_type == 'external_video' -%}
+    {%- assign render_this_product = true -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if render_this_product -%}
+  <div class="product-card video-mode product-card-shadow">
+    <a href="{{ product.url }}" class="card-link heading-size" aria-label="View {{ product.title }}"></a>
+    <div class="product-image">
+      {{
+        video_media_object
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          muted: true,
+          playsinline: true,
+          preload: 'metadata',
+          class: 'product-video'
+      }}
+    </div>
+    <div class="product-details">
+      <h3 class="product-title">{{ product.title }}</h3>
+      <div class="price">
+        {% if product.compare_at_price > product.price %}
+          <span class="original-price">₹{{ product.compare_at_price | money_without_currency }}</span>
+          <span class="discounted-price">₹{{ product.price | money_without_currency }}</span>
+        {% else %}
+          <span class="regular-price">₹{{ product.price | money_without_currency }}</span>
+        {% endif %}
+      </div>
+      <div class="features">
+        {% assign tags = product.metafields.custom.feature_list.value %}
+        {% if tags and tags.size > 0 %}
+          {% for tag in tags limit: 2 %}
+            <span class="feature">{{ tag }}</span>
+            {% unless forloop.last %}
+              <span class="separator">|</span>
+            {% endunless %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+
+  .original-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 5px;
+}
+.features {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.feature {
+   color: var( --brand-primary-color-font-body);
+   opacity:0.8;
+   font-size:"5px"
+}
+.separator {
+   color: var( --brand-primary-color-font-body);
+   margin-right:2px;
+   opacity:0.8;
+
+   margin-left:2px;
+}
+@media (max-width: 768px) {
+  .card-link {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+}
+</style>

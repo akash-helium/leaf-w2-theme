@@ -1,0 +1,51 @@
+{% section 'product-template' %}
+{% section 'product-reel-video' %}
+{% section 'related-products' %}
+{% section 'recently-viewed-products' %}
+
+{% comment %}
+  {% section 'asset-carousel' %}
+{% endcomment %}
+
+
+
+{% render 'judgeme_widgets', widget_type: 'judgeme_review_widget', concierge_install: true, auto_install: true, product: product %}
+
+
+
+
+
+
+
+<script>
+  setTimeout(function(){
+  $('.ProductForm__AddToCart').click(function(){
+    setTimeout(function(){
+    jQuery.getJSON('/cart.js', function(cart) {
+    console.log('Wigzo fired for cart token :'+ cart.token);
+    wigzo("track", "addtocart",{
+      "canonicalUrl":"{{product.url}}",
+      "cartId": cart.token,
+      "plugin": "shopify"
+    });
+    });
+      },5000);
+  });
+  $('.shopify-payment-button__button').click(function(){
+    setTimeout(function(){
+    jQuery.getJSON('/cart.js', function(cart) {
+    console.log('Wigzo fired');
+    wigzo ("track", "addtocart",{
+        "canonicalUrl":"{{product.url}}",
+        "cartId": "{{cartToken}}",
+        "plugin": "shopify"
+      });
+    });
+       },5000);
+    });
+  },5000);
+
+</script>
+
+
+<div class='social-widget-wrapper' data-widget-id='22608'></div>

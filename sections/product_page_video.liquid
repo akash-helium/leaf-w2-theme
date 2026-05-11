@@ -1,0 +1,133 @@
+<div class="video-product">
+  <div class="Video_product_content">
+    <h1 class="Video_product_contenth1">{{ section.settings.head1 }}</h1>
+    <h3 class="Video_product_contenth3">{{ section.settings.head2 }}</h3>
+    <a data-fancybox="video-gallery" data-src="{{ section.settings.video_url_iframe }}" data-width="100%" data-height="100%">
+    <button class="btn Video_product_contenthbtn">{{ section.settings.button }}</button>
+    </a>
+  </div>
+  <video width="100%" height="100%" class="video-container video-container-overlay"  autoplay controls loop>
+    <source src="{{ section.settings.video_url }}" type="video/mp4">
+  </video>
+</div>
+
+
+
+{% schema %}
+  {
+    "name": "Section name",
+    "settings": [
+					{
+						"type" : "text",
+						"id" : "head1",
+						"label" : "Heading"
+						
+					},
+					{
+						"type" : "text",
+						"id" : "head2",
+						"label" : "Heading 2"
+						
+					},
+					{
+						"type" : "text",
+						"id" : "button",
+						"label" : "Button Name"
+						
+					},
+					{
+						"type" : "url",
+						"id" : "video_url",
+						"label" : "Video Link"
+						
+					},
+					{
+						"type" : "url",
+						"id" : "video_url_iframe",
+						"label" : "Video Link"
+					}
+
+],
+		"presets": [
+    {
+      "category": "video",
+      "name": "Video Section"
+    }
+  ]
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
+
+<!-- Video Section Css -->
+<style>
+  .video-product
+  {
+  		width : 100%;
+    	display : block;
+    	max-width  : 100%;
+   		position : relative;
+  }
+ .Video_product_content {
+    position: absolute;
+    bottom: 10%;
+    padding: 2% 4%;
+    left: 5%;
+    text-align: left;
+    z-index: 1;
+    color: #fff;
+    max-width: 100%;
+    display: block;
+}
+  h1.Video_product_contenth1 {
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 0px;
+    cursor: pointer;
+    font-family: Montserrat,sans-serif;
+    letter-spacing: 0.5px;
+}
+  h3.Video_product_contenth3 {
+    font-family: Montserrat,sans-serif;
+    font-size: 80px;
+    font-weight: 600;
+    cursor: pointer;
+   	letter-spacing: 0.5px;
+    margin-bottom : 0px;
+}
+ button.btn.Video_product_contenthbtn {
+    font-weight: 500;
+    padding: 20px 35px;
+    transition: .3s all;
+    font-size: 25px;
+    cursor: pointer;
+    display: inline-block;
+    width: auto;
+    outline: 0;
+    line-height: 1;
+    margin: 0;
+    color: #fff;
+    background: #505af0;
+    border: 2px solid #505af0;
+}
+  
+@media (max-width:767px)
+{
+	h1.Video_product_contenth1 {
+    font-size: 18px;
+}
+  h3.Video_product_contenth3 {
+    font-size: 12PX;
+}
+  button.btn.Video_product_contenthbtn {
+    padding: 6px 15px;
+}
+
+}
+</style>
+
+

@@ -1,0 +1,297 @@
+{% schema %}
+{
+  "name": "Best seller Video",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Select a Collection"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Optional Product Override",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Best seller"
+    }
+  ]
+}
+{% endschema %}
+
+<div class="bestsellers">
+  <div class="best-sellers-heading">
+    {% assign selected_collection = collections[section.settings.collection] %}
+
+    {% if selected_collection %}
+      <h2 id="bestsellers-title" class="heading-size">{{ selected_collection.title }}</h2>
+      <a href="{{ selected_collection.url }}" class="best-seller-btn desktop-only btn-secondary">View all products</a>
+    {% else %}
+      <h2 id="bestsellers-title" class="heading-size">Bestsellers</h2>
+    {% endif %}
+  </div>
+
+  <div class="product-scroll-container video-products-row">
+    {% assign video_products_found = false %}
+
+    {% if section.blocks.size > 0 %}
+      {% for block in section.blocks %}
+        {% assign product = all_products[block.settings.product] %}
+        {% assign is_video_check = product.metafields.custom.is_video.value %}
+        {% assign video_media_object_check = product.metafields.custom.url_video.value %}
+
+        {% if product and is_video_check and video_media_object_check != null and video_media_object_check.media_type == 'video' %}
+          {% render 'leaf-product-card', product: product %}
+          {% assign video_products_found = true %}
+        {% endif %}
+      {% endfor %}
+    {% elsif selected_collection and selected_collection.products.size > 0 %}
+      {% for product in selected_collection.products %}
+        {% assign is_video_check = product.metafields.custom.is_video.value %}
+        {% assign video_media_object_check = product.metafields.custom.url_video.value %}
+
+        {% if is_video_check and video_media_object_check != null and video_media_object_check.media_type == 'video' %}
+          {% render 'leaf-product-card', product: product, no_add_to_cart: true %}
+          {% assign video_products_found = true %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  {% if selected_collection %}
+    <div class="mobile-view-all">
+      <a href="{{ selected_collection.url }}" class="best-seller-btn mobile-only btn-secondary">View all products</a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.bestsellers {
+  padding: 60px 0px 40px !important;
+}
+
+.product-details {
+  padding: 11px;
+}
+
+.best-sellers-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.best-sellers-heading h2.fade-in-x-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.section-subheading {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  padding: 0 20px;
+}
+.best-seller-btn {
+  border: 1px solid #212529;
+  padding: 12px 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.mobile-view-all {
+  display: none;
+  text-align: center;
+  margin-top: 24px;
+  padding: 0 20px;
+}
+.product-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 10px 10px 20px 20px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.product-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+.product-scroll-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.product-card {
+  flex: 0 0 auto;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+.product-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+.expand-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background: var(--brand-icons-bg);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.product-card:hover .expand-icon {
+  transform: scale(1.2);
+}
+.product-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--card-image-bg);
+  border-radius: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.product-image video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product-image .normal-image {
+  width: 75%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+.product-card:hover .product-image .normal-image {
+  transform: scale(1.05);
+}
+.arrow-image {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.price {
+  font-size: 13px;
+  color: var(--brand-secondary-color-font);
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+.product-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
+}
+
+@media (max-width: 768px) {
+  .bestsellers {
+    padding: 24px 0;
+  }
+  .best-sellers-heading {
+    margin-bottom: 20px;
+    padding: 0 20px;
+  }
+  .best-sellers-heading h2 {
+    font-size: 1.25rem;
+    text-align: center;
+    width: 100%;
+  }
+  .section-subheading {
+    margin-top: 30px;
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+  .product-scroll-container {
+    padding: 10px 10px 16px 16px;
+    gap: 16px;
+  }
+
+  .product-title {
+    font-size: 13px;
+  }
+  .price {
+    font-size: 12px;
+  }
+  .desktop-only {
+    display: none;
+  }
+  .mobile-view-all {
+    display: block;
+  }
+  .mobile-only {
+    display: inline-flex;
+  }
+   .product-card {
+    max-width: 240px;
+  }
+}
+
+@media (min-width: 769px) {
+  .product-card {
+    max-width: 340px;
+  }
+  .bestsellers {
+    padding: 60px 40px;
+  }
+  .best-sellers-heading {
+    padding: 0 40px;
+    margin-bottom: 32px;
+  }
+  .best-sellers-heading h2 {
+    font-size: 2rem;
+    text-align: left;
+  }
+  .section-subheading {
+    padding: 0 40px;
+  }
+  .product-scroll-container {
+    padding: 10px 10px 40px 40px;
+    gap: 24px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const bestsellersTitleElement = document.getElementById('bestsellers-title');
+  if (!bestsellersTitleElement) return;
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('fade-in-x-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  observer.observe(bestsellersTitleElement);
+});
+</script>

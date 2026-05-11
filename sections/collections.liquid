@@ -1,0 +1,203 @@
+
+
+
+<div class="collection-slider-wrapper">
+
+
+  <section class="collection_section">
+
+    <div class="collection_details">
+      {% for collection in section.settings.selected_collections %}
+        {% if collection.title and collection.image %}
+          <a
+            href="{{ collection.url }}"
+            class="collection_detail-image"
+            {% comment %} data-helium-animation="blurScaleIn"
+            data-helium-animation-trigger="view" {% endcomment %}
+          >
+            <img src="{{ collection.image | img_url: '800x' }}" class="feature-story-image" alt="{{ collection.title | escape }}">
+            <p>{{ collection.title }}</p>
+          </a>
+        {% elsif collection.title %}
+          <a href="{{ collection.url }}" class="collection_detail-image">
+            <p>{{ collection.title }}</p>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+
+<style>
+  .collection-slider-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+
+  .slide-arrow {
+    display: none;
+    fill: #333;
+  }
+
+  .collection_details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    gap: 50px;
+  }
+
+  .collection_detail-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--bg-card-box-shadow);
+  }
+
+  .collection_details img {
+    width: 130px;
+    height: auto;
+    object-fit: cover;
+    margin: 0 auto;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+  }
+
+  .collection_detail-image:hover img {
+    transform: scale(1.1);
+  }
+
+  .collection_details p {
+    text-align: center;
+    font-weight: 500;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+  }
+
+  .collection_detail-image:hover p {
+    transform: scale(1.1);
+  }
+
+
+  @media (max-width: 768px) {
+    .slide-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+       background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+    
+    .slide-arrow svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .left-arrow {
+      left: 5px;
+       fill: #ffffff;
+    }
+
+    .right-arrow {
+      right: 5px;
+       fill: #ffffff;
+    }
+
+    .collection_details {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 24px 15px;
+      gap: 25px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .collection_details::-webkit-scrollbar {
+      display: none;
+    }
+
+   .collection_details img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+}
+
+    .collection_detail-image {
+      flex-shrink: 0;
+      width: 160px;
+      min-width: 160px;
+      scroll-snap-align: center;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const sliders = document.querySelectorAll('.collection-slider-wrapper');
+    
+    const scrollAmount = 250;
+
+    sliders.forEach(slider => {
+      const scroller = slider.querySelector('.collection_details');
+      const slideLeftButton = slider.querySelector('.left-arrow');
+      const slideRightButton = slider.querySelector('.right-arrow');
+
+      if (scroller && slideLeftButton && slideRightButton) {
+        slideRightButton.addEventListener('click', () => {
+          scroller.scrollLeft += scrollAmount;
+        });
+
+        slideLeftButton.addEventListener('click', () => {
+          scroller.scrollLeft -= scrollAmount;
+        });
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Select Collections",
+  "tag": "section",
+  "class": "all-collections-section",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "selected_collections",
+      "label": "Choose Collections",
+      "info": "Select the collections you want to display."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Select Collections"
+    }
+  ]
+}
+{% endschema %}

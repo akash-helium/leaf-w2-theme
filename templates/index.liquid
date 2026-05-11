@@ -1,0 +1,184 @@
+<style>
+  :root {
+    --brand-primary-color: #000000;
+    --brand-bg: #000000;
+    --brand-secondary-color:rgba(247, 247, 247, 1);
+
+    --brand-accent-color: #1B66EF;
+    --brand-bg-muted: rgba(255, 255, 255, 0.3);
+    --brand-border-secondary: #3b82f6;
+    --brand-bg-muted-hover: rgba(255, 255, 255, 0.2);
+    --brand-border-muted: rgba(255, 255, 255, 0.3);
+    
+    --brand-border-muted-hover: rgba(255, 255, 255, 0.5);
+    --brand-primary-color-font-body: #ffffff;
+    --brand-primary-color-font-heading: #ffffff;
+    --brand-secondary-color-font:#000000;
+    --brand-bg-gradient: linear-gradient(90deg, rgba(4, 179, 68, 0.05) 0%, rgba(27, 102, 239, 0.05) 100%);
+    --brand-primary-text-gradient: linear-gradient(90deg, #04B344 0%, #1B66EF 100%);
+    --brand-text-muted: rgba(0, 0, 0, 0.5);
+   
+    --brand-bg-aurora: linear-gradient(0deg, rgba(4, 179, 68, 0.7) 0%, rgba(27, 102, 239, 0.7) 10%, black 50%);
+   
+
+    --bg-card:var(--brand-secondary-color);
+    --card-image-bg:radial-gradient(circle at center, #333 0%, #1a1a1a 80%);
+    --card-text-primary:var(--brand-bg);
+    --car-text-secondary:var(--brand-secondary-color-font);
+    --bg-card-box-shadow:0px 0px 10px 4px rgba(255,255,255,0.18);
+    
+
+    --brand-icons-bg:rgba(5, 5, 5, 0.05);
+
+
+  }
+  .aurora-shadow{
+     position: relative;
+  }
+.aurora-shadow::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: var(--brand-bg-gradient);
+  filter: blur(20px);
+  z-index: -1;
+  border-radius: inherit;
+}
+  
+  :root {
+    --btn-padding-y: 9px;
+    --btn-padding-x: 18px;
+    --btn-font-size: 13px;
+    --btn-font-weight: 600;
+    --btn-border-radius: 24px;
+    --btn-transition: all 0.2s ease;
+    --btn-primary-bg: var(--brand-primary-color);
+    --btn-primary-bg-hover: hsl(from var(--brand-primary-color) h s 10%);
+    --btn-primary-text: var(--brand-primary-color-font-body);
+    --btn-primary-border: var(--brand-primary-color);
+    --btn-secondary-bg: var(--brand-primary-color-font-body);
+    --btn-secondary-bg-hover: hsl(from var(--brand-primary-color-font-body) h s 95%);
+    --btn-secondary-text: var(--brand-primary-color);
+    --btn-secondary-border: var(--brand-primary-color);
+  }
+
+  .btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    border-radius: var(--btn-border-radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--btn-transition);
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border-color: var(--btn-primary-border);
+  }
+  .btn-primary:hover {
+    background-color: var(--btn-primary-bg-hover);
+  }
+  .btn-secondary {
+    background-color: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border-color: var(--btn-secondary-border);
+  }
+  .btn-secondary:hover {
+    background-color: var(--btn-secondary-bg-hover);
+  }
+
+  body {
+    background-color: var(--brand-bg);
+    color: var(--brand-primary-color-font-body);
+    
+   
+  }
+  p, span, div {
+    color: var(--brand-primary-color-font-body);
+  }
+  h1, h2, h3, h4, h5, h6{
+    color: var(--brand-primary-color-font-heading);
+    
+  }
+  h2{
+    font-size:24px;
+  }
+
+  div#sidebar-cart>* {
+    color: #000 !important;
+}
+  div#sidebar-cart p,
+  div#sidebar-cart span,
+  div#sidebar-cart a,
+  div#sidebar-cart input {
+color: #000 !important;
+}
+div#sidebar-cart button.sr-headless-checkout span {
+    color: #fff !important;
+}
+.bg-aurora{
+ background-color: var(--brand-bg-aurora)
+}
+  .bg-revert, .bg-white {
+    background-color: var( --brand-bg);
+  }
+  .bg-secondary {
+    background: var(--brand-secondary-color);
+  }
+  .bg-accent {
+    background: var(--brand-accent-color);
+  }
+
+  .text-primary {
+    color: var(--brand-primary-color-font-body);
+  }
+  .text-revert {
+    color: var(--brand-primary-color);
+  }
+  .text-secondary {
+    color: var(--brand-secondary-color);
+  }
+  .text-tertiary, .text-accent {
+    color: var(--brand-accent-color);
+  }
+  .text-muted {
+    color: var(--brand-text-muted);
+  }
+
+  .text-gradient {
+    background: var(--brand-primary-text-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .card{
+    background:var(--bg-card);
+  }
+  .product-card-shadow{
+    box-shadow:var(--bg-card-box-shadow);
+  }
+   .product-card-shadow:hover{
+    box-shadow:var(--bg-card-box-shadow);
+  }
+    
+  .heading-size {
+  font-size: 28px !important;
+   font-weight: bold;
+    text-align:center;
+    
+}
+  
+</style>
+
+{{ content_for_index }}
+{% comment %} {% include 'judgeme_widgets', widget_type: 'judgeme_featured_carousel', concierge_install: true, auto_install: true %} {% endcomment %}

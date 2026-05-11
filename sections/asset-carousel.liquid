@@ -1,0 +1,288 @@
+{% schema %}
+{
+  "name": "Asset Carousel",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "bg_image_desktop",
+          "label": "Background Image (Desktop)"
+        },
+        {
+          "type": "image_picker",
+          "id": "bg_image_mobile",
+          "label": "Background Image (Mobile)"
+        },
+        {
+          "type": "video",
+          "id": "bg_video_desktop",
+          "label": "Background Video (Desktop)",
+          "info": "Video will override image on desktop."
+        },
+        {
+          "type": "video",
+          "id": "bg_video_mobile",
+          "label": "Background Video (Mobile)",
+          "info": "Video will override image on mobile."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Asset Carousel",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+{%- liquid
+  assign section_id = '#shopify-section-' | append: section.id
+-%}
+
+<div class="swiper asset-carousel" id="Carousel-{{ section.id }}">
+  <div class="swiper-wrapper">
+    {%- for block in section.blocks -%}
+      {%- assign product = all_products[block.settings.product] -%}
+
+      {%- if product != blank -%}
+        {%- assign product_url = product.url -%}
+        {%- assign desktop_video = block.settings.bg_video_desktop -%}
+        {%- assign desktop_image = block.settings.bg_image_desktop -%}
+        {%- assign mobile_video = block.settings.bg_video_mobile -%}
+        {%- assign mobile_image = block.settings.bg_image_mobile -%}
+
+        <div class="swiper-slide" {{ block.shopify_attributes }}>
+          <a href="{{ product_url }}" class="product-slide-link" aria-label="View {{ product.title | escape }}">
+            <div class="product-slide-wrapper">
+
+              <!-- Desktop Asset -->
+              <div class="slide-bg desktop">
+                {%- if desktop_video != blank -%}
+                  {{- desktop_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'slide-bg__video' -}}
+                {%- elsif desktop_image != blank -%}
+                  <img src="{{ desktop_image | image_url: width: 1920 }}"
+                       alt="{{ product.title | escape }}"
+                       loading="lazy"
+                       width="{{ desktop_image.width }}"
+                       height="{{ desktop_image.height }}">
+                {%- endif -%}
+              </div>
+
+              <!-- Mobile Asset -->
+              <div class="slide-bg mobile">
+                {%- if mobile_video != blank -%}
+                  {{- mobile_video | video_tag: 
+  autoplay: true, 
+  loop: true, 
+  muted: true, 
+  controls: false, 
+  playsinline: true,
+  class: 'slide-bg__video' 
+-}}
+                {%- elsif mobile_image != blank -%}
+                  <img src="{{ mobile_image | image_url: width: 800 }}"
+                       alt="{{ product.title | escape }}"
+                       loading="lazy"
+                       width="{{ mobile_image.width }}"
+                       height="{{ mobile_image.height }}">
+                {%- endif -%}
+              </div>
+
+            </div>
+
+              <div class="slide-overlay">
+
+        <button class="shop-now-btn btn-secondary">Shop Now</button>
+      </div>
+          </a>
+
+        
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <!-- Pagination dots -->
+  <div class="swiper-pagination"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  // Robust initialization: Scoped to the specific section ID
+  const assetCarousel_{{ section.id }} = document.querySelector('#Carousel-{{ section.id }}');
+  if (assetCarousel_{{ section.id }}) {
+    new Swiper(assetCarousel_{{ section.id }}, {
+      loop: true,
+      pagination: {
+        el: '#Carousel-{{ section.id }} .swiper-pagination',
+        clickable: true
+      },
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false
+      },
+      a11y: {
+        prevSlideMessage: 'Previous slide',
+        nextSlideMessage: 'Next slide',
+      }
+    });
+  }
+  document.querySelectorAll('.slide-bg__video').forEach(video => {
+  video.play().catch(() => {});
+});
+</script>
+
+<style>
+  {{ section_id }} .swiper {
+    width: 100%;
+    height: 80vh;
+    position: relative;
+  }
+  {{ section_id }} .swiper-slide {
+    position: relative;
+    overflow: hidden;
+  }
+  {{ section_id }} .product-slide-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    min-height: 400px;
+    position: relative;
+  }
+  {{ section_id }} .product-slide-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  {{ section_id }} .slide-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  {{ section_id }} .slide-bg img,
+  {{ section_id }} .slide-bg .slide-bg__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  {{ section_id }} .slide-bg.desktop {
+    display: block;
+  }
+  {{ section_id }} .slide-bg.mobile {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    {{ section_id }} .slide-bg.desktop {
+      display: none;
+    }
+    {{ section_id }} .slide-bg.mobile {
+      display: block;
+    }
+    #shopify-section-asset_carousel_yUqnQx .product-slide-wrapper {
+    min-height: 80vh;
+}
+#shopify-section-asset_carousel_yUqnQx .slide-bg .slide-bg__video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+  }
+  {{ section_id }} .swiper-pagination {
+    position: absolute;
+    bottom: 20px;
+    left: auto;
+    right:20px;
+    width:auto;
+    display:block;
+    z-index: 2;
+    text-align: center;
+  }
+  {{ section_id }} .swiper-pagination-bullet {
+    background: #fff;
+    opacity: 0.5;
+    margin: 0 4px;
+    transition: background-color 0.3s, opacity 0.3s;
+  }
+  {{ section_id }} .swiper-pagination-bullet-active {
+    opacity: 1;
+    background-color: #fff;
+  }
+
+
+  {{ section_id }} .slide-overlay {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  color: #fff;
+  z-index: 5;
+  cursor:pointer;
+}
+
+
+{{ section_id }} .shop-now-btn {
+
+  padding: 15px 50px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  cursor:pointer;
+
+}
+
+{{ section_id }} .shop-now-btn:hover {
+ 
+   cursor:pointer;
+}
+
+@media (max-width: 767px) {
+  {{ section_id }} .slide-overlay {
+    bottom: 20px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    align-items: center;
+    text-align: center;
+  }
+  {{ section_id }} .slide-title {
+    font-size: 1.25rem;
+  }
+  {{ section_id }} .shop-now-btn {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+</style>

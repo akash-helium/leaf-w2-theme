@@ -1,0 +1,224 @@
+{% schema %}
+{
+  "name": "Leaf audio",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Leaf Audio Section",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<section class="personalised-leaf-audio">
+  <div class="personalised-container">
+    <div class="personalised-header">
+      <h2 id="leaf-audio-title heading-size" class="heading-size">Personalised audio with Leaf AI sound app</h2>
+      <div class="app-store-buttons desktop-buttons">
+        <a
+          href="https://apps.apple.com/app/your-app-id"
+          class="store-badge app-store-btn"
+          target="_blank"
+          rel="noopener"
+        >
+          <img src="{{'image(2).png' | asset_url }}" alt="Download on the App Store">
+        </a>
+        <a
+          href="https://play.google.com/store/apps/details?id=com.leafstudios.android"
+          class="store-badge google-play-btn"
+          target="_blank"
+          rel="noopener"
+        >
+          <img src="{{ 'google-badge-light.svg' | asset_url }}" alt="Get it on Google Play" style="height:75px">
+        </a>
+      </div>
+    </div>
+
+    <div class="personalised-image">
+      <img
+        src="{{ section.settings.image | img_url: '1536x1024' }}"
+        alt="Personalised_Story"
+        class="personalised-story-image"
+      >
+    </div>
+
+    <div class="app-store-buttons mobile-buttons">
+      <a href="https://apps.apple.com/app/your-app-id" class="store-badge app-store-btn" target="_blank" rel="noopener">
+        <img src="{{ 'image(2).png' | asset_url }}" alt="Download on the App Store">
+      </a>
+      <a
+        href="https://play.google.com/store/apps/details?id=com.leafstudios.android"
+        class="store-badge google-play-btn"
+        target="_blank"
+        rel="noopener"
+      >
+        <img src="{{ 'google-badge-light.svg' | asset_url }}" alt="Get it on Google Play" style="height:75px">
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .personalised-leaf-audio {
+    padding: 80px 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  .personalised-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+    text-align:center
+  }
+
+
+  .personalised-header h2.fade-in-x-visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .personalised-image {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    background: linear-gradient(to right, #00FFC0, #004FFF);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .personalised-image img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  .app-store-buttons {
+    display: flex;
+    align-items: center;
+    justify-content:center;
+  }
+
+  .desktop-buttons {
+    flex-shrink: 0;
+  }
+
+  .mobile-buttons {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+  }
+
+  .store-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left:16px;
+  }
+
+  .store-badge img {
+    width: 150px;
+    height:50px;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+  }
+
+  .store-badge:hover img {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .personalised-leaf-audio {
+      padding: 40px 20px;
+    }
+
+    .personalised-header {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .personalised-header h2 {
+      font-size: 1.5rem;
+      text-align: left;
+      width: 100%;
+    }
+
+    .store-badge img {
+      width: 120px;
+      height:40px;
+      border-radius: 8px;
+      transition: transform 0.2s ease;
+    }
+
+    .desktop-buttons {
+      display: none;
+    }
+
+    .mobile-buttons {
+      display: flex;
+      flex-direction:row;
+      justify-content:center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .personalised-header h2 {
+      font-size: 1.2rem;
+    }
+
+    .mobile-buttons {
+      gap: 12px;
+    }
+
+    .store-badge img {
+      height: 45px;
+      width: 135px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const titleElement = document.getElementById('leaf-audio-title');
+
+    if (!titleElement) {
+      return;
+    }
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in-x-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    observer.observe(titleElement);
+  });
+</script>

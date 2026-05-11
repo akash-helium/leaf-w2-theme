@@ -1,0 +1,969 @@
+{% comment %} {% assign current_page_title = 'Shop' %}
+
+{% if collection %}
+  {% assign current_page_title = collection.title %}
+{% elsif page and page.title %}
+  {% assign current_page_title = page.title %}
+{% endif %}
+
+{% assign current_sort_by = collection.sort_by | default: collection.default_sort_by %}
+{% assign current_product_type_param = request.query_parameters['filter.p.product_type'] %}
+
+<div class="collection-header">
+  <div class="collection-header__left">
+    <h1 class="collection-header__title">
+      <span class="title-desktop">{{ current_page_title }}</span>
+    </h1>
+  </div>
+  <div class="collection-header__right">
+    <span class="collection-header__product-count">{{ collection.products_count }} Products</span>
+  </div>
+</div>
+
+
+<div class="collection-wrapper">
+  <div class="collection-tabs">
+    {% if section.blocks.size > 0 %}
+      {% for block in section.blocks %}
+        {% assign coll = collections[block.settings.collection] %}
+        {% if coll %}
+          {% assign tab_active_class = '' %}
+          {% if coll.handle == collection.handle %}
+            {% assign tab_active_class = 'is-active' %}
+          {% endif %}
+          <a href="{{ coll.url }}" class="collection-tab {{ tab_active_class }}">
+            {{ coll.title }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {%- comment -%}Fallback: show first 5 collections if no blocks selected{%- endcomment -%}
+      {% for coll in collections limit:5 %}
+        {% assign tab_active_class = '' %}
+        {% if coll.handle == collection.handle %}
+          {% assign tab_active_class = 'is-active' %}
+        {% endif %}
+        <a href="{{ coll.url }}" class="collection-tab {{ tab_active_class }}">
+          {{ coll.title }}
+        </a>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  {% if section.settings.show_sort_by %}
+    <!-- Desktop Sort By - visible on desktop, hidden on mobile -->
+    <div class="collection-sort-by collection-sort-by--desktop">
+      <span class="sort-by__label">Sort by</span>
+      <div class="sort-by__dropdown-wrapper">
+        <select name="SortBy" id="SortByDesktop" class="sort-by__select">
+          {% for option in collection.sort_options %}
+            <option value="{{ option.value }}" {% if option.value == current_sort_by %}selected="selected"{% endif %}>
+              {{ option.name }}
+            </option>
+          {% endfor %}
+        </select>
+        <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-caret-down" viewBox="0 0 10 6">
+          <path d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill-rule="evenodd"/>
+        </svg>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Mobile Sort Button - Fixed at bottom (visible on mobile only) -->
+{% if section.settings.show_sort_by %}
+<div class="mobile-sort-trigger">
+  <button id="OpenMobileSort">Sort By <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-caret-down" viewBox="0 0 10 6">
+          <path d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill-rule="evenodd"/>
+        </svg>
+</button>
+</div>
+
+<!-- Mobile Sort Overlay -->
+<div class="mobile-sort-overlay" id="MobileSortOverlay"></div>
+
+<!-- Mobile Sort Bottom Sheet (visible on mobile only) -->
+<div class="mobile-sort-sheet" id="MobileSortSheet">
+  <div class="mobile-sort-sheet__header">
+    <span>Sort By</span>
+    <button class="mobile-sort-sheet__close" id="CloseMobileSort" style="display:none">X</button>
+  </div>
+  <ul class="mobile-sort-sheet__options">
+    {% for option in collection.sort_options %}
+      <li class="mobile-sort-sheet__option" data-value="{{ option.value }}">
+        {{ option.name }}
+      </li>
+    {% endfor %}
+  </ul>
+  <button class="mobile-sort-sheet__view-results" id="ApplyMobileSort">View Results</button>
+</div>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- Desktop Sort Logic ---
+    const sortSelectDesktop = document.getElementById('SortByDesktop');
+    if (sortSelectDesktop) {
+      sortSelectDesktop.addEventListener('change', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort_by', this.value);
+        window.location.href = url.toString();
+      });
+    }
+
+    // --- Mobile Sort Logic ---
+    const openMobileSortBtn = document.getElementById('OpenMobileSort');
+    const closeMobileSortBtn = document.getElementById('CloseMobileSort');
+    const mobileSortSheet = document.getElementById('MobileSortSheet');
+    const mobileSortOverlay = document.getElementById('MobileSortOverlay'); // Select the new overlay element
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-sheet__option');
+    const applyMobileSortBtn = document.getElementById('ApplyMobileSort');
+
+    // Get current sort_by from URL or default Liquid value
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentMobileSortValue = urlParams.get('sort_by') || '{{ collection.sort_by | default: collection.default_sort_by }}';
+
+    // Highlight initial selected option in the mobile sheet
+    mobileSortOptions.forEach(option => {
+      if (option.dataset.value === currentMobileSortValue) {
+        option.classList.add('is-selected');
+      }
+    });
+
+    if (openMobileSortBtn && mobileSortSheet && closeMobileSortBtn && applyMobileSortBtn && mobileSortOverlay) {
+      // Function to close the mobile sort sheet and overlay
+      const closeSheet = () => {
+        mobileSortSheet.classList.remove('is-open');
+        mobileSortOverlay.classList.remove('is-visible'); // Hide overlay
+        document.body.style.overflow = ''; // Restore body scrolling
+      };
+
+      openMobileSortBtn.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent this click from immediately propagating to document and closing the sheet
+        mobileSortSheet.classList.add('is-open');
+        mobileSortOverlay.classList.add('is-visible'); // Show overlay
+        document.body.style.overflow = 'hidden'; // Prevent scrolling body when sheet is open
+      });
+
+      closeMobileSortBtn.addEventListener('click', function() {
+        closeSheet();
+      });
+
+      mobileSortOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove selected class from all options
+          mobileSortOptions.forEach(opt => opt.classList.remove('is-selected'));
+          // Add selected class to the clicked option
+          this.classList.add('is-selected');
+          currentMobileSortValue = this.dataset.value; // Update the selected value
+        });
+      });
+
+      applyMobileSortBtn.addEventListener('click', function() {
+        if (currentMobileSortValue) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('sort_by', currentMobileSortValue);
+          window.location.href = url.toString();
+        }
+        closeSheet();
+      });
+
+      // Close drawer and overlay on outside click
+      document.body.addEventListener('click', function(event) {
+        if (mobileSortSheet.classList.contains('is-open') &&
+            !mobileSortSheet.contains(event.target) &&
+            !openMobileSortBtn.contains(event.target)) {
+          closeSheet();
+        }
+      });
+
+      // Close drawer and overlay if overlay itself is clicked
+      mobileSortOverlay.addEventListener('click', function() {
+        closeSheet();
+      });
+    }
+  });
+</script>
+
+<style>
+  .collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 15px;
+    padding: 0 15px;
+  }
+
+  .collection-header__title {
+    font-size: 2.25rem;
+    font-weight: normal;
+    margin: 0;
+  }
+
+  .collection-header__product-count {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .collection-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 15px;
+    margin-bottom:30px;
+  }
+
+  .collection-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: 0px;
+    scrollbar-color: #ccc transparent;
+    padding-bottom: 6px;
+  }
+
+  .collection-tabs::-webkit-scrollbar {
+    height: 0px;
+    width:0px;
+  }
+  .collection-tabs::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 0px;
+  }
+
+  .collection-tab {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #eee;
+    background-color: #f8f8f8;
+  color: rgba(0, 0, 0, 0.5);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .collection-tab:hover {
+    background-color: #e0e0e0;
+  }
+
+  .collection-tab.is-active {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+    font-weight: 600;
+  }
+
+  /* SORT */
+  /* Desktop Sort By - Default display */
+  .collection-sort-by--desktop {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .collection-sort-by--desktop .sort-by__label {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .collection-sort-by--desktop .sort-by__dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .collection-sort-by--desktop .sort-by__select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #000;
+    padding-right: 20px;
+    font-size: 14px;
+    color: #000;
+    cursor: pointer;
+    background-image: none;
+    line-height: 1.4;
+  }
+
+  .collection-sort-by--desktop .sort-by__select:focus {
+    outline: none;
+  }
+
+  .collection-sort-by--desktop .icon-caret-down {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 6px;
+    fill: #000;
+    pointer-events: none;
+  }
+
+  /* Mobile specific elements - hidden by default on desktop */
+  .mobile-sort-trigger,
+  .mobile-sort-sheet,
+  .mobile-sort-overlay { /* Include overlay here */
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .collection-header__title {
+      font-size: 1.75rem;
+    }
+    .collection-wrapper {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .collection-sort-by {
+      margin-top: 10px;
+      align-self: flex-end;
+    }
+
+    .title-desktop {
+      display: none;
+    }
+    .title-mobile {
+      display: inline;
+    }
+
+    /* Make header a single centered row like your screenshot */
+    .collection-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: 0 10px;
+      margin-bottom: 0px;
+      margin-top:10px;
+    }
+
+    .collection-header__title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .collection-header__product-count {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: #666;
+    }
+
+    .collection-header__title span{
+    display:block;
+  }
+    /* Tabs: full width scrollable strip under title */
+    .collection-wrapper {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      margin-bottom: 30px; /* Adjust to ensure space above mobile sort trigger */
+    }
+
+    .collection-tabs {
+      order: 1;
+      width: 100%;
+      gap: 5px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+
+    .collection-tab {
+      padding: 8px 6px;
+      border:none;  
+      background-color: transparent;
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .collection-tab:hover {
+      background-color: #e0e0e0;
+    }
+
+    .collection-tab.is-active {
+      color: #000;
+      background:transparent;
+      border:none;
+      font-weight: 600;
+    }
+
+    /* Hide desktop sort-by on mobile */
+    .collection-sort-by--desktop {
+      display: none;
+    }
+
+    /* Show mobile specific sort elements on mobile */
+    .mobile-sort-trigger,
+    .mobile-sort-sheet {
+      display: flex; /* Override default hidden state */
+    }
+
+    /* Mobile Sort Overlay */
+    .mobile-sort-overlay {
+      display: none; /* Hidden by default, shown by JS */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+      backdrop-filter: blur(3px); /* Blur effect */
+      z-index: 1000; /* Behind the sheet, above other content */
+      transition: opacity 0.3s ease-out;
+      opacity: 0;
+    }
+
+    .mobile-sort-overlay.is-visible {
+      opacity: 1;
+      display: block; /* Make it visible */
+    }
+
+    /* Mobile Sort Button (fixed at bottom) */
+    .mobile-sort-trigger {
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      border-top: 1px solid #333;
+      padding: 5px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      z-index: 1000; /* Ensure it's above other content but below the sheet/overlay */
+    }
+
+    .mobile-sort-trigger button {
+      color: #333;
+      border: none;
+      padding: 8px 30px;
+      border-radius: 5px;
+      font-size: 14px;
+      display:flex;
+      font-weight: 500;
+      max-width: 400px; /* Optional max-width */
+      cursor: pointer;
+    align-items:center;
+    }
+    .icon-caret-down{
+    width:16px;
+    margin-left:5px;
+     height:16px;}
+
+    /* Mobile Sort Bottom Sheet */
+    .mobile-sort-sheet {
+      flex-direction: column;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-height: 80vh; /* Limit height */
+      background-color: #fff;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+      transform: translateY(100%); /* Start off-screen */
+      transition: transform 0.3s ease-out;
+      z-index: 1001; /* Above the overlay */
+      overflow: hidden; /* For rounded corners */
+    }
+
+    .mobile-sort-sheet.is-open {
+      transform: translateY(0); /* Slide in */
+    }
+
+    .mobile-sort-sheet__header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px 20px 10px;
+      font-size: 16px;
+      font-weight: 600;
+      position: relative; /* Needed for absolute positioning of close button */
+    }
+
+    .mobile-sort-sheet__header span {
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .mobile-sort-sheet__close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      color: #888;
+      position: absolute; /* Position close button */
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .mobile-sort-sheet__options {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1; /* Allow options to take up available space */
+      overflow-y: auto; /* Scroll if many options */
+    }
+
+    .mobile-sort-sheet__option {
+      padding: 5px 20px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.5);
+
+      text-align:center;
+      cursor: pointer;
+
+    }
+
+    .mobile-sort-sheet__option:last-child {
+      border-bottom: none;
+    }
+
+    .mobile-sort-sheet__option.is-selected {
+      color: #333;
+      font-weight: 600;
+      position: relative;
+    }
+
+    {% comment %} .mobile-sort-sheet__option.is-selected::after {
+      content: '✓'; /* Checkmark for selected item */
+      position: absolute;
+      right: 20px;
+      color: #000;
+      font-size: 18px;
+    } {% endcomment %}
+
+    .mobile-sort-sheet__view-results {
+      color: rgba(0, 0, 0, 0.5);
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-top:1px solid #333;
+      font-weight: 500;
+      width: 100%;
+      cursor: pointer;
+      margin-top: auto; /* Push to bottom */
+    }
+  }
+</style> {% endcomment %}
+
+
+
+{% assign current_page_title = 'Shop' %}
+{% if collection %}
+  {% assign current_page_title = collection.title %}
+{% elsif page and page.title %}
+  {% assign current_page_title = page.title %}
+{% endif %}
+
+{% assign current_sort_by = collection.sort_by | default: collection.default_sort_by %}
+
+<div class="collection-header">
+  <div class="collection-header__left">
+    <h1 class="collection-header__title">
+      <span class="title-desktop">{{ current_page_title }}</span>
+    </h1>
+  </div>
+  <div class="collection-header__right">
+    <span class="collection-header__product-count">{{ collection.products_count }} Products</span>
+  </div>
+</div>
+
+
+{%- comment -%}
+  STEP 1: Build list → "title||handle"
+{%- endcomment -%}
+
+{% assign subcollection_list = "" %}
+
+{% for product in collection.products %}
+  {% assign subcol_obj = product.metafields.custom.subcollection.value %}
+  
+  {% if subcol_obj != blank %}
+    {% assign val_title = subcol_obj.title %}
+    {% assign val_handle = subcol_obj.handle %}
+    
+    {% assign subcollection_list = subcollection_list
+      | append: val_title
+      | append: '||'
+      | append: val_handle
+      | append: '##' %}
+  {% endif %}
+{% endfor %}
+
+{%- comment -%}
+  STEP 2: Unique + Sort (by title automatically)
+{%- endcomment -%}
+
+{% assign unique_subcollections = subcollection_list | split: '##' | uniq %}
+{% assign sorted_subcollections = unique_subcollections | sort %}
+
+<div class="collection-wrapper">
+  <div class="collection-tabs">
+
+    <!-- ALWAYS FIRST -->
+    <a href="#" class="collection-tab is-active" data-filter="all">
+      All
+    </a>
+
+    {%- comment -%}
+      STEP 3: Render sorted tabs
+    {%- endcomment -%}
+    {% for item in sorted_subcollections %}
+      {% assign parts = item | split: '||' %}
+      {% assign val_title = parts[0] %}
+      {% assign val_handle = parts[1] %}
+      
+      {% if val_handle != blank %}
+        <a href="#" class="collection-tab" data-filter="{{ val_handle }}">
+          {{ val_title }}
+        </a>
+      {% endif %}
+    {% endfor %}
+
+  </div>
+
+  {% if section.settings.show_sort_by %}
+    <div class="collection-sort-by collection-sort-by--desktop">
+      <span class="sort-by__label">Sort by</span>
+      <div class="sort-by__dropdown-wrapper">
+        <select name="SortBy" id="SortByDesktop" class="sort-by__select">
+          {% for option in collection.sort_options %}
+            <option value="{{ option.value }}" {% if option.value == current_sort_by %}selected="selected"{% endif %}>
+              {{ option.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- METAFIELD FILTERING LOGIC ---
+    const filterTabs = document.querySelectorAll('.collection-tab');
+    
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // 1. Manage Active State
+        filterTabs.forEach(t => t.classList.remove('is-active'));
+        this.classList.add('is-active');
+        
+        // 2. Get Filter Value
+        const filterValue = this.getAttribute('data-filter');
+        
+        // 3. Filter Grid Items
+        const productItems = document.querySelectorAll('.ProductList .Grid__Cell');
+        
+        productItems.forEach(item => {
+          if (filterValue === 'all') {
+            item.style.display = ''; // Restore default display
+          } else {
+            // Check the data attribute we added in collection-template
+            const itemSubcol = item.getAttribute('data-subcollection');
+            if (itemSubcol === filterValue) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          }
+        });
+      });
+    });
+
+
+    // --- Desktop Sort Logic ---
+    const sortSelectDesktop = document.getElementById('SortByDesktop');
+    if (sortSelectDesktop) {
+      sortSelectDesktop.addEventListener('change', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort_by', this.value);
+        window.location.href = url.toString();
+      });
+    }
+
+    // --- Mobile Sort Logic ---
+    const openMobileSortBtn = document.getElementById('OpenMobileSort');
+    const closeMobileSortBtn = document.getElementById('CloseMobileSort');
+    const mobileSortSheet = document.getElementById('MobileSortSheet');
+    const mobileSortOverlay = document.getElementById('MobileSortOverlay');
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-sheet__option');
+    const applyMobileSortBtn = document.getElementById('ApplyMobileSort');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentMobileSortValue = urlParams.get('sort_by') || '{{ collection.sort_by | default: collection.default_sort_by }}';
+
+    mobileSortOptions.forEach(option => {
+      if (option.dataset.value === currentMobileSortValue) {
+        option.classList.add('is-selected');
+      }
+    });
+
+    if (openMobileSortBtn && mobileSortSheet && closeMobileSortBtn && applyMobileSortBtn && mobileSortOverlay) {
+      const closeSheet = () => {
+        mobileSortSheet.classList.remove('is-open');
+        mobileSortOverlay.classList.remove('is-visible');
+        document.body.style.overflow = '';
+      };
+
+      openMobileSortBtn.addEventListener('click', function(event) {
+        event.stopPropagation();
+        mobileSortSheet.classList.add('is-open');
+        mobileSortOverlay.classList.add('is-visible');
+        document.body.style.overflow = 'hidden';
+      });
+
+      closeMobileSortBtn.addEventListener('click', function() {
+        closeSheet();
+      });
+
+      mobileSortOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          mobileSortOptions.forEach(opt => opt.classList.remove('is-selected'));
+          this.classList.add('is-selected');
+          currentMobileSortValue = this.dataset.value;
+        });
+      });
+
+      applyMobileSortBtn.addEventListener('click', function() {
+        if (currentMobileSortValue) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('sort_by', currentMobileSortValue);
+          window.location.href = url.toString();
+        }
+        closeSheet();
+      });
+
+      document.body.addEventListener('click', function(event) {
+        if (mobileSortSheet.classList.contains('is-open') &&
+            !mobileSortSheet.contains(event.target) &&
+            !openMobileSortBtn.contains(event.target)) {
+          closeSheet();
+        }
+      });
+
+      mobileSortOverlay.addEventListener('click', function() {
+        closeSheet();
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Styles preserved */
+  .collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 15px;
+    padding: 0 15px;
+  }
+
+  .collection-header__title {
+    font-size: 2.25rem;
+    font-weight: normal;
+    margin: 0;
+  }
+
+  .collection-header__product-count {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .collection-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 15px;
+    margin-bottom:30px;
+  }
+
+  .collection-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: 0px;
+    scrollbar-color: #ccc transparent;
+    padding-bottom: 6px;
+  }
+
+  .collection-tabs::-webkit-scrollbar {
+    height: 0px;
+    width:0px;
+  }
+  .collection-tabs::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 0px;
+  }
+
+  .collection-tab {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #eee;
+    background-color: #f8f8f8;
+    color: rgba(0, 0, 0, 0.5);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .collection-tab:hover {
+    background-color: #e0e0e0;
+  }
+
+  .collection-tab.is-active {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+    font-weight: 600;
+  }
+
+  .collection-sort-by--desktop {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .collection-sort-by--desktop .sort-by__label {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .collection-sort-by--desktop .sort-by__dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .collection-sort-by--desktop .sort-by__select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #000;
+    padding-right: 20px;
+    font-size: 14px;
+    color: #000;
+    cursor: pointer;
+    background-image: none;
+    line-height: 1.4;
+  }
+
+  .collection-sort-by--desktop .sort-by__select:focus {
+    outline: none;
+  }
+
+  .collection-sort-by--desktop .icon-caret-down {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 6px;
+    fill: #000;
+    pointer-events: none;
+  }
+
+  .mobile-sort-trigger,
+  .mobile-sort-sheet,
+  .mobile-sort-overlay {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .collection-header__title { font-size: 1.75rem; }
+    .collection-wrapper { flex-direction: column; align-items: flex-start; }
+    .collection-sort-by { margin-top: 10px; align-self: flex-end; }
+    .title-desktop { display: none; }
+    .title-mobile { display: inline; }
+    .collection-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: 0 10px;
+      margin-bottom: 0px;
+      margin-top:10px;
+    }
+    .collection-header__title { font-size: 1.125rem; font-weight: 600; text-align: center; }
+    .collection-header__product-count {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; color: #666;
+    }
+    .collection-header__title span{ display:block; }
+    .collection-wrapper { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 30px; }
+    .collection-tabs { order: 1; width: 100%; gap: 5px; padding-bottom: 4px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+    .collection-tab { padding: 8px 6px; border:none; background-color: transparent; text-decoration: none; font-size: 14px; transition: all 0.2s ease-in-out; }
+    .collection-tab:hover { background-color: #e0e0e0; }
+    .collection-tab.is-active { color: #000; background:transparent; border:none; font-weight: 600; }
+    .collection-sort-by--desktop { display: none; }
+    .mobile-sort-trigger, .mobile-sort-sheet { display: flex; }
+    
+    .mobile-sort-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(3px);
+      z-index: 1000; transition: opacity 0.3s ease-out; opacity: 0;
+    }
+    .mobile-sort-overlay.is-visible { opacity: 1; display: block; }
+    
+    .mobile-sort-trigger {
+      justify-content: center; align-items: center; position: fixed; bottom: 0; left: 0; width: 100%;
+      background-color: #fff; border-top: 1px solid #333; padding: 5px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
+    }
+    .mobile-sort-trigger button {
+      color: #333; border: none; padding: 8px 30px; border-radius: 5px; font-size: 14px;
+      display:flex; font-weight: 500; max-width: 400px; cursor: pointer; align-items:center;
+    }
+    .icon-caret-down{ width:16px; margin-left:5px; height:16px;}
+    
+    .mobile-sort-sheet {
+      flex-direction: column; position: fixed; bottom: 0; left: 0; width: 100%; max-height: 80vh;
+      background-color: #fff; border-top-left-radius: 20px; border-top-right-radius: 20px;
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s ease-out;
+      z-index: 1001; overflow: hidden;
+    }
+    .mobile-sort-sheet.is-open { transform: translateY(0); }
+    .mobile-sort-sheet__header {
+      display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px;
+      font-size: 16px; font-weight: 600; position: relative;
+    }
+    .mobile-sort-sheet__header span { flex-grow: 1; text-align: center; }
+    .mobile-sort-sheet__close {
+      background: none; border: none; font-size: 20px; cursor: pointer; padding: 0; color: #888;
+      position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+    }
+    .mobile-sort-sheet__options { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+    .mobile-sort-sheet__option { padding: 5px 20px; font-size: 14px; color: rgba(0, 0, 0, 0.5); text-align:center; cursor: pointer; }
+    .mobile-sort-sheet__option:last-child { border-bottom: none; }
+    .mobile-sort-sheet__option.is-selected { color: #333; font-weight: 600; position: relative; }
+    .mobile-sort-sheet__view-results {
+      color: rgba(0, 0, 0, 0.5); border: none; padding: 10px 20px; font-size: 14px;
+      border-top:1px solid #333; font-weight: 500; width: 100%; cursor: pointer; margin-top: auto;
+    }
+  }
+</style>

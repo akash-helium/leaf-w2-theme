@@ -1,0 +1,811 @@
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/swiper/swiper-bundle.min.css"
+>
+
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+{
+  "name": "Custom Product Banner",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "product_slide",
+      "name": "Product Slide",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "Custom Product Banner Slider",
+      "category": "Media",
+      "blocks": [
+        {
+          "type": "product_slide"
+        },
+        {
+          "type": "product_slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<section class="spotlight-section" data-section-id="{{ section.id }}">
+  <div class="swiper mySwiper">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        {% assign product = all_products[block.settings.product] %}
+        {% if product %}
+          {% assign desktop_image = product.metafields.custom.banner_desktop %}
+          {% assign mobile_image = product.metafields.custom.banner_mobile %}
+
+          <div
+            class="swiper-slide"
+            data-product-handle="{{ product.handle }}"
+            data-original-index="{{ forloop.index0 }}"
+          >
+            <picture>
+              {% if mobile_image %}
+                <source media="(max-width: 768px)" srcset="{{ mobile_image | img_url: 'master' }}">
+              {% endif %}
+              <img
+                src="{{ desktop_image | default: product.featured_image | img_url: 'master' }}"
+                alt="Banner for {{ product.title }}"
+                width="100%"
+                height="100%"
+              >
+            </picture>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="product-wrapper">
+    <div id="dynamic-product-card-container"></div>
+
+    <div class="product-category-buttons swiper category-buttons-swiper">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          {% if block.type == 'product_slide' %}
+            {% assign product = all_products[block.settings.product] %}
+            {% if product %}
+              <div class="swiper-slide">
+                <button class="category-btn" data-product-handle="{{ product.handle }}">
+                  {% if product.featured_image %}
+                    <div class="category-img-wrapper">
+                      <img
+                        src="{{ product.featured_image | img_url: '80x80' }}"
+                        alt="{{ product.title }}"
+                        class="category-img"
+                      >
+                    </div>
+                  {% endif %}
+                  <span>{{ product.title }}</span>
+                </button>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <script id="product-data-json-{{ section.id }}" type="application/json">
+    [
+      {% for block in section.blocks %}
+        {% assign product = all_products[block.settings.product] %}
+        {% if product %}
+          {
+            "handle": "{{ product.handle | escape }}",
+            "title": "{{ product.title | escape }}",
+            "imageUrl": "{{ product.featured_image | img_url: '400x' | escape }}",
+            "productUrl": "{{ product.url | escape }}",
+            "buyUrl": "{{ product.variants.first.url | default: product.url | escape }}",
+            "tags": [
+              {% if product.metafields.custom.feature_list.value %}
+                {% for attribute in product.metafields.custom.feature_list.value %}
+                  "{{ attribute | escape }}"{% unless forloop.last %},{% endunless %}
+                {% endfor %}
+              {% endif %}
+            ]
+          }{% unless forloop.last %},{% endunless %}
+        {% endif %}
+      {% endfor %}
+    ]
+  </script>
+</section>
+
+<style>
+  .spotlight-section {
+    font-family:"Poppins", sans-serif !important;
+    position: relative;
+    width: 100%;
+    max-width:100vw;
+    height:100vh;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .swiper {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .swiper-wrapper {
+    }
+
+    .swiper-slide {
+      width: 100%;
+      position: relative;
+      flex-shrink: 0;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    .swiper-slide picture,
+    .swiper-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+
+
+  .product-wrapper {
+    position: absolute;
+    bottom: 120px;
+    left: 40px;
+    width: calc(100% - 80px);
+    box-sizing: border-box;
+    height: auto;
+  }
+
+
+  #dynamic-product-card-container {
+    position: absolute;
+    z-index: 10;
+    width: 350px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px); 
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+  }
+
+
+  #dynamic-product-card-container.active-card {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .product-detail-card {
+    max-width: none;
+    padding: 12px;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    background:var(--brand-secondary-color);
+  }
+
+  .product-detail-header-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .product-detail-card .product-detail-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color:var(--brand-secondary-color-font);
+  }
+
+  .product-detail-image-container {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    color:var(--brand-secondary-color-font);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .product-detail-icon {
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .product-detail-description {
+    font-size: 13px;
+    line-height: 1.4;
+    color:var(--brand-text-muted);
+    margin: 0;
+  }
+
+  .product-features-section {
+    margin-top: 0;
+    padding: 0 5px;
+  }
+
+  .product-features-heading {
+    display: none;
+  }
+
+  .product-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px; 
+    justify-content: flex-start;
+  }
+
+  .product-feature-item {
+    padding: 8px 12px;
+    font-size: 8px;
+    border-radius: 24px;
+    background:var(--brand-bg-gradient);
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+
+  .product-detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+    justify-content:center;
+  }
+
+  /* .btn-view-product {
+    width:60%;
+    border-radius: 24px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-view-product {
+    background: white;
+    color: #222;
+    border: 1px solid #222;
+  }
+
+  .btn-view-product:hover {
+    background: #f5f5f5;
+  } */
+
+  .btn-buy-now {
+    background:var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border: 1px solid var(--brand-primary-color-font-body);
+  }
+
+  .btn-buy-now:hover {
+    background:var(--btn-primary-bg-hover);
+  }
+
+
+  .product-category-buttons {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    display: flex; 
+    gap: 24px; 
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .product-category-buttons::-webkit-scrollbar {
+    height: 0px;
+    display: none;
+  }
+
+  .product-category-buttons .swiper-slide {
+      width: auto !important;
+      flex-shrink: 0;
+  }
+
+  .category-btn {
+    display: flex;
+    align-items: center;
+    width: 340px;
+    height: 70px;
+    background: var(--brand-bg-muted);
+    border: 1px solid var(--brand-border-muted);
+    border-radius: 35px;
+    padding: 0 16px;
+    color: var(--brand-primary-color-font-body);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    gap: 8px;
+    justify-content: space-between;
+    box-sizing: border-box;
+    margin:25px;
+  }
+
+  .category-btn:hover {
+    background: var(--brand-bg-muted-hover);
+    border-color:var(--brand-border-muted-hover);
+  }
+
+  .category-btn.active {
+    border-color: var(--brand-border-secondary);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .category-img-wrapper {
+    width: 50px;
+    height: 50px;
+    background-color: var(--brand-bg-muted);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .category-img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  .category-btn span {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 8px;
+    margin-right: 8px;
+    font-size:12px;
+  }
+
+
+  .category-btn::after {
+    content: '+';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    background-color: var(--brand-text-muted);
+    color: var(--brand-primary-color-font-body);
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: 500;
+    flex-shrink: 0;
+    line-height:1;
+
+    transition: transform 0.3s ease;
+  }
+
+  .category-btn.active::after {
+    transform: rotate(135deg);
+  }
+
+  @media (max-width: 768px) {
+    .product-wrapper {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index:55;
+    }
+
+    #dynamic-product-card-container {
+      position: relative;
+      left: auto !important;
+      bottom: auto !important;
+      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease; /* Maintain transition on mobile */
+      order: 1;
+    }
+
+    .product-detail-card {
+      text-align: center;
+    }
+
+    .product-detail-header-group {
+      justify-content: center;
+    }
+
+    .product-features-list {
+      justify-content: center;
+    }
+
+    .product-detail-actions {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn-view-product,
+    .btn-buy-now {
+      flex-grow: 1;
+      min-width: unset;
+      padding: 8px 12px;
+    }
+
+    .product-category-buttons {
+      position: relative;
+      bottom: auto;
+      left: 4%;
+      width: 100%;
+      order: 2;
+      margin-top: 0;
+      padding-right: 0;
+      justify-content: flex-start;
+      align-items: center;
+      overflow-x: hidden;
+      gap: 0;
+    }
+
+    .category-btn {
+      width: 340px;
+      height: 60px;
+      font-size: 13px;
+      padding: 0 12px;
+      border-radius: 30px;
+    }
+
+    .category-img-wrapper {
+      width: 44px;
+      height: 44px;
+    }
+
+    .category-btn::after {
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-wrapper {
+      width: calc(100% - 30px);
+    }
+
+    .category-btn {
+      width: 260px;
+      height: 50px;
+      font-size: 12px;
+      padding: 0 10px;
+      border-radius: 25px;
+    }
+
+    .category-img-wrapper {
+      width: 38px;
+      height: 38px;
+    }
+
+    .category-btn::after {
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let mySwiperInstance;
+    let categoryButtonsSwiper;
+
+    if (typeof Swiper !== 'undefined') {
+      mySwiperInstance = new Swiper(".mySwiper", {
+        loop: true,
+        slidesPerView: 1,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        spaceBetween: 0,
+        grabCursor: true,
+        observer: true,
+        observeParents: true,
+        observeSlideChildren: true,
+        on: {
+          resize: function () {
+            this.update();
+          },
+        },
+      });
+    } else {
+      console.error("Swiper library is not loaded. Check its inclusion.");
+    }
+
+
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileOverlay = document.querySelector('.mobile-nav-overlay');
+    const mobileClose = document.querySelector('.mobile-nav-close');
+
+    if (mobileToggle && mobileOverlay) {
+      mobileToggle.addEventListener('click', function() {
+        mobileOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (mobileClose && mobileOverlay) {
+      mobileClose.addEventListener('click', function() {
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
+
+    if (mobileOverlay) {
+      mobileOverlay.addEventListener('click', function(e) {
+        if (e.target === mobileOverlay) {
+          mobileOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    const sectionId = document.querySelector('.spotlight-section').dataset.sectionId;
+    const productDataScript = document.getElementById(`product-data-json-${sectionId}`);
+    let allProductsData = [];
+
+    if (productDataScript) {
+      try {
+        allProductsData = JSON.parse(productDataScript.textContent);
+      } catch (e) {
+        console.error("Error parsing product data JSON:", e);
+      }
+    }
+
+    const dynamicProductCardContainer = document.getElementById('dynamic-product-card-container');
+    const categoryButtons = document.querySelectorAll('.product-category-buttons .category-btn ');
+    const productCategoryButtonsContainer = document.querySelector('.product-category-buttons');
+    const productWrapper = document.querySelector('.product-wrapper');
+
+    function renderProductDetails(product) {
+      if (!product || !dynamicProductCardContainer) return;
+
+      dynamicProductCardContainer.innerHTML = ''; // Clear existing content
+
+      const descriptionHtml = product.description;
+
+      let featuresHtml = '';
+      if (product.tags && product.tags.length > 0) {
+          const tagsToShow = product.tags.slice(0, 3);
+          featuresHtml = `
+              <div class="product-features-section">
+                  <ul class="product-features-list">
+                      ${tagsToShow.map(feature => `<li class="product-feature-item"><span class="text text-gradient">${feature}</span></li>`).join('')}
+                  </ul>
+              </div>
+          `;
+      }
+
+      dynamicProductCardContainer.innerHTML = `
+        <div class="product-detail-card">
+          <div class="product-detail-header-group">
+            <div class="product-detail-image-container">
+              <img src="${product.imageUrl}" alt="${product.title} Image" class="product-detail-icon">
+            </div>
+            <h3 class="product-detail-title">${product.title}</h3>
+          </div>
+          ${featuresHtml}
+          <div class="product-detail-actions">
+            <a href="${product.productUrl}" class="btn-view-product btn">View product</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeProductCard() {
+      dynamicProductCardContainer.classList.remove('active-card');
+      categoryButtons.forEach(btn => btn.classList.remove('active'));
+    }
+
+
+    function updateProductCardPosition(targetButton = null) {
+      if (!dynamicProductCardContainer || !productCategoryButtonsContainer || !productWrapper) return;
+
+      if (window.innerWidth > 768) {
+        const categoryButtonsHeight = productCategoryButtonsContainer.offsetHeight;
+        const gapBetweenCardAndButtons = 20;
+        dynamicProductCardContainer.style.bottom = `${categoryButtonsHeight + gapBetweenCardAndButtons}px`;
+
+        let activeTargetButton = targetButton || document.querySelector('.product-category-buttons .category-btn.active');
+
+        if (activeTargetButton) {
+            const buttonRect = activeTargetButton.getBoundingClientRect();
+            const wrapperRect = productWrapper.getBoundingClientRect();
+            let cardLeft = buttonRect.left - wrapperRect.left;
+            const cardWidth = dynamicProductCardContainer.offsetWidth;
+            const wrapperWidth = productWrapper.offsetWidth;
+
+            if (cardLeft < 0) cardLeft = 0;
+            if (cardLeft + cardWidth > wrapperWidth) cardLeft = wrapperWidth - cardWidth;
+            if (cardLeft < 0) cardLeft = 0;
+
+            dynamicProductCardContainer.style.left = `${cardLeft}px`;
+        } else {
+          dynamicProductCardContainer.style.left = `0px`;
+        }
+      } else {
+        dynamicProductCardContainer.style.left = 'auto';
+        dynamicProductCardContainer.style.bottom = 'auto';
+      }
+    }
+
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        const productHandle = this.dataset.productHandle;
+        const thisButtonIsActive = this.classList.contains('active');
+        const cardIsOpen = dynamicProductCardContainer.classList.contains('active-card');
+
+        if (thisButtonIsActive && cardIsOpen) {
+          closeProductCard();
+        } else {
+
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+
+          const selectedProduct = allProductsData.find(product => product.handle === productHandle);
+          if (selectedProduct) {
+            renderProductDetails(selectedProduct);
+            dynamicProductCardContainer.classList.add('active-card');
+            updateProductCardPosition(this);
+          }
+
+          // Sync main Swiper with clicked category button
+          if (mySwiperInstance) {
+            const swiperSlide = document.querySelector(`.swiper-slide[data-product-handle="${productHandle}"]`);
+            const originalIndex = swiperSlide ? parseInt(swiperSlide.dataset.originalIndex) : -1;
+            if (originalIndex >= 0) {
+              mySwiperInstance.slideToLoop(originalIndex);
+            }
+          }
+        }
+      });
+    });
+
+    document.addEventListener('click', function(e) {
+      const isClickInsideCard = dynamicProductCardContainer.contains(e.target);
+      const isClickInsideCategoryButtons = productCategoryButtonsContainer.contains(e.target);
+      if (dynamicProductCardContainer.classList.contains('active-card') && !isClickInsideCard && !isClickInsideCategoryButtons) {
+        closeProductCard();
+      }
+    });
+
+    function initCategoryButtonsSwiper() {
+      if (window.innerWidth <= 768 && !categoryButtonsSwiper) {
+        categoryButtonsSwiper = new Swiper(".category-buttons-swiper", {
+          slidesPerView: 'auto',
+          spaceBetween: 24,
+          freeMode: true,
+          watchOverflow: true,
+          observer: true,
+          observeParents: true,
+          on: {
+            init: () => updateProductCardPosition(),
+            destroy: () => {
+              dynamicProductCardContainer.style.left = 'auto';
+              dynamicProductCardContainer.style.bottom = 'auto';
+              updateProductCardPosition();
+            }
+          }
+        });
+      } else if (window.innerWidth > 768 && categoryButtonsSwiper) {
+        categoryButtonsSwiper.destroy(true, true);
+        categoryButtonsSwiper = null;
+        updateProductCardPosition();
+      } else if (window.innerWidth > 768 && !categoryButtonsSwiper) {
+          updateProductCardPosition();
+      }
+    }
+
+    if (mySwiperInstance) {
+      mySwiperInstance.on('slideChangeTransitionEnd', function () {
+        const currentRealIndex = mySwiperInstance.realIndex;
+        const currentSlide = mySwiperInstance.slides.find(slide =>
+          parseInt(slide.dataset.originalIndex) === currentRealIndex
+        );
+        const currentProductHandle = currentSlide ? currentSlide.dataset.productHandle : null;
+
+        if (currentProductHandle) {
+          const targetButton = document.querySelector(`.product-category-buttons .category-btn[data-product-handle="${currentProductHandle}"]`);
+
+          if (targetButton && !targetButton.classList.contains('active')) {
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            targetButton.classList.add('active');
+
+            if (window.innerWidth > 768) {
+                const selectedProduct = allProductsData.find(product => product.handle === currentProductHandle);
+                if (selectedProduct) {
+                  renderProductDetails(selectedProduct);
+                  dynamicProductCardContainer.classList.add('active-card');
+                  updateProductCardPosition(targetButton);
+                }
+            }
+
+          }
+
+          if (categoryButtonsSwiper) {
+            const activeIndex = Array.from(categoryButtons).findIndex(btn => btn.classList.contains('active'));
+            if (activeIndex !== -1) {
+              categoryButtonsSwiper.slideTo(activeIndex, 300, true);
+            }
+          }
+        } else {
+          closeProductCard();
+        }
+      });
+    }
+
+
+    initCategoryButtonsSwiper();
+    window.addEventListener('resize', initCategoryButtonsSwiper);
+
+
+    if (allProductsData.length > 0 && categoryButtons.length > 0) {
+
+      if (window.innerWidth > 768) {
+        const firstProductHandle = categoryButtons[0].dataset.productHandle;
+        const firstProduct = allProductsData.find(p => p.handle === firstProductHandle);
+        if (firstProduct) {
+          renderProductDetails(firstProduct);
+          dynamicProductCardContainer.classList.add('active-card');
+          categoryButtons[0].classList.add('active');
+          updateProductCardPosition(categoryButtons[0]);
+        }
+      }
+
+
+      if (mySwiperInstance) {
+          mySwiperInstance.slideToLoop(0, 0);
+      }
+    }
+  });
+</script>

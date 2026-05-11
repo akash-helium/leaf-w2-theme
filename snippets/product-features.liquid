@@ -1,0 +1,105 @@
+{% comment %}
+Displays feature list powered by metafields:
+- product.metafields.custom.feature_icon (List of Files)
+- product.metafields.custom.feature_list (List of text)
+- product.metafields.custom.product_message (String)
+{% endcomment %}
+
+{% assign icons = product.metafields.custom.product_feature_images.value %}
+{% assign texts = product.metafields.custom.feature_list.value %}
+{% assign message = product.metafields.custom.product_message %}
+
+{% if icons != blank or texts != blank or message != blank %}
+  <div class="ProductFeatures container">
+    <div class="ProductFeatures__Grid">
+      {% if icons and texts %}
+        {% for text in texts %}
+          {% assign index = forloop.index0 %}
+          {% assign icon = icons[index] %}
+          {% if text != blank %}
+            <div class="ProductFeatures__Item">
+              {% if icon %}
+                <img 
+                  src="{{ icon }}" 
+                  alt="{{ text | escape }}" 
+                  class="ProductFeatures__Icon"
+                  loading="lazy"
+                  width="64"
+                  height="64"
+                >
+              {% endif %}
+              <span class="ProductFeatures__Text">{{ text }}</span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    {% if message %}
+      <div class="ProductFeatures__Message">
+         <p>{{ message | default: "100+ people ordered this in the last 3 days" }}</p>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<style>
+  .ProductFeatures {
+    text-align: center;
+  }
+
+  .ProductFeatures__Grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .ProductFeatures__Item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .ProductFeatures__Icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ProductFeatures__Message {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    display: block;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(4, 179, 68, 0.05) 0%, rgba(27, 102, 239, 0.05) 100%);
+    margin: 0 auto;
+  }
+
+  .ProductFeatures__Message p {
+    background: linear-gradient(90deg, #04B344 0%, #1B66EF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media screen and (max-width: 767px){
+  
+  .ProductFeatures__Grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .ProductFeatures__Text{
+  
+  font-size:1rem;
+}
+}
+</style>

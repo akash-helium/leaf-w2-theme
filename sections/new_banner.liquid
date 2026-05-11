@@ -1,0 +1,445 @@
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    assign section_id = 'promo-swiper-' | append: section.id
+    assign bg_gradient = section.settings.background_gradient
+    if bg_gradient == blank
+      assign bg_gradient = 'linear-gradient(90deg, rgba(4 179 68 / 0.05) 0%, rgba(27 102 239 / 0.05) 100%)'
+    endif
+  -%}
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
+  <div class="product-promo-slider-wrapper">
+    <div class="swiper" id="{{ section_id }}">
+      <div class="swiper-wrapper">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign product = block.settings.featured_product
+            if product == blank
+              continue
+            endif
+            
+            assign product_title = product.title
+            if product.metafields.custom.short_title.value != blank
+              assign product_title = product.metafields.custom.short_title.value
+            endif
+            if block.settings.heading != blank
+              assign product_title = block.settings.heading
+            endif
+            
+            assign final_image = product.featured_image
+            if product.metafields.custom.transparent_hero_image.value != blank
+              assign final_image = product.metafields.custom.transparent_hero_image.value
+            endif
+            if block.settings.main_image != blank
+              assign final_image = block.settings.main_image
+            endif
+
+            assign final_secondary_image = product.metafields.custom.hero_secondary.value
+            if block.settings.secondary_image != blank
+              assign final_secondary_image = block.settings.secondary_image
+            endif
+
+            assign feature_list = product.metafields.custom.feature_list.value
+          -%}
+          <div class="swiper-slide" {{ block.shopify_attributes }}>
+            <div class="product-promo-container" style="--slide-background: {{ bg_gradient }};">
+              
+              <div class="promo-image-wrapper">
+                <div class="promo-gradient-bg"></div>
+                <img
+                  src="{{ final_image | image_url: width: 1200 }}"
+                  alt="{{ final_image.alt | default: product.title | escape }}"
+                  loading="lazy"
+                  width="{{ final_image.width }}"
+                  height="{{ final_image.height }}"
+                  class="promo-image">
+              </div>
+
+              {%- if block.settings.desktop_background_text != blank -%}
+                <div class="faint-background-text">
+                  {{ block.settings.desktop_background_text | newline_to_br }}
+                </div>
+              {%- endif -%}
+
+              {%- if final_secondary_image != blank -%}
+                <div class="promo-secondary-image-wrapper">
+                   <img
+                    src="{{ final_secondary_image | image_url: width: 600 }}"
+                    alt="{{ final_secondary_image.alt | default: product.title | escape }}"
+                    loading="lazy"
+                    width="{{ final_secondary_image.width }}"
+                    height="{{ final_secondary_image.height }}"
+                    class="promo-image-secondary">
+                </div>
+              {%- endif -%}
+
+              <div class="promo-info-center">
+                <h1 class="desktop-heading">{{ product_title | newline_to_br }}</h1>
+                {%- if block.settings.description != blank -%}
+                  <div class="desktop-description">{{ block.settings.description }}</div>
+                {%- endif -%}
+                {%- if block.settings.button_text != blank -%}
+                  <a href="{{ block.settings.button_link | default: product.url }}" class="desktop-button">
+                    {{ block.settings.button_text }}
+                  </a>
+                {%- endif -%}
+              </div>
+
+              <div class="promo-header-mobile">
+                {%- if block.settings.eyebrow_text != blank -%}
+                  <span class="promo-eyebrow">{{ block.settings.eyebrow_text }}</span>
+                {%- endif -%}
+              </div>
+              
+              <div class="promo-main-content-mobile">
+                 <h2 class="mobile-background-heading" style="font-size: clamp(2.5rem, 10vw, 5rem);">{{ product.metafields.custom.short_title | newline_to_br }}</h2>
+              </div>
+            
+              {%- if feature_list.size > 0 -%}
+                <div class="promo-features-grid-mobile">
+                  {%- for feature in feature_list -%}
+                    <div class="feature-item">
+                      <p class="feature-text text-gradient">{{ feature | escape }}</p>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const swiperEl = document.querySelector('#{{ section_id }}');
+      if (!swiperEl) return;
+
+   
+      function animateContentIn(slide) {
+        const elementsToShow = slide.querySelectorAll('.promo-image, .promo-gradient-bg, .promo-info-center, .faint-background-text, .promo-secondary-image-wrapper, .promo-header-mobile, .mobile-background-heading, .promo-features-grid-mobile');
+        elementsToShow.forEach(el => {
+          if (el) {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }
+        });
+      }
+
+      function animateContentOut(slide) {
+        const elementsToHide = slide.querySelectorAll('.promo-image, .promo-gradient-bg, .promo-info-center, .faint-background-text, .promo-secondary-image-wrapper, .promo-header-mobile, .mobile-background-heading, .promo-features-grid-mobile');
+        elementsToHide.forEach(el => {
+          if (el) {
+            el.style.opacity = '0';
+          }
+        });
+      }
+
+      window.enhancedAnimateIn = animateContentIn;
+      window.enhancedAnimateOut = animateContentOut;
+
+      const swiper = new Swiper(swiperEl, {
+        loop: true,
+        grabCursor: true,
+        effect: 'fade',
+        fadeEffect: { crossFade: true },
+        speed: 400,
+        pagination: { el: '#{{ section_id }} .swiper-pagination', clickable: true },
+        navigation: { nextEl: '#{{ section_id }} .swiper-button-next', prevEl: '#{{ section_id }} .swiper-button-prev' },
+        {% if section.settings.autoplay %}
+        autoplay: {
+          delay: {{ section.settings.delay | default: 5000 }},
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        },
+        {% endif %}
+        on: {
+          init: function() {
+            if (this.slides[this.activeIndex]) {
+              window.enhancedAnimateIn(this.slides[this.activeIndex]);
+            }
+          },
+          slideChangeTransitionStart: function () {
+            if (this.slides[this.previousIndex]) {
+              window.enhancedAnimateOut(this.slides[this.previousIndex]);
+            }
+          },
+          slideChangeTransitionEnd: function () {
+            if (this.slides[this.activeIndex]) {
+              window.enhancedAnimateIn(this.slides[this.activeIndex]);
+            }
+          }
+        }
+      });
+    });
+  </script>
+
+  <script type="module">
+    try {
+      const { animate } = await import("https://cdn.skypack.dev/motion");
+      window.enhancedAnimateIn = function(slide) {
+        const image = slide.querySelector('.promo-image');
+        const gradient = slide.querySelector('.promo-gradient-bg');
+        const desktopInfo = slide.querySelector('.promo-info-center');
+        const desktopBgText = slide.querySelector('.faint-background-text');
+        const secondaryImage = slide.querySelector('.promo-secondary-image-wrapper');
+        const mobileHeader = slide.querySelector('.promo-header-mobile');
+        const mobileBgText = slide.querySelector('.mobile-background-heading');
+        const mobileFeatures = slide.querySelector('.promo-features-grid-mobile');
+
+        if (image) animate(image, { opacity: [0, 1], transform: ['translateY(30px)', 'translateY(0px)'] }, { duration: 0.6, delay: 0.2, easing: 'ease-out' });
+
+        if (desktopInfo) animate(desktopInfo, { opacity: [0, 1], y: [20, 0] }, { duration: 0.5, delay: 0.3 });
+        if (desktopBgText) animate(desktopBgText, { opacity: [0, 1] }, { duration: 0.8, delay: 0.1 });
+        if (secondaryImage) animate(secondaryImage, { opacity: [0, 1], y: [20, 0] }, { duration: 0.6, delay: 0.4 });
+        if (mobileHeader) animate(mobileHeader, { opacity: [0, 1] }, { duration: 0.5 });
+        if (mobileBgText) animate(mobileBgText, { opacity: [0, 1] }, { duration: 0.6, delay: 0.1 });
+        if (mobileFeatures) animate(mobileFeatures, { opacity: [0, 1], y: [20, 0] }, { duration: 0.5, delay: 0.2 });
+      };
+
+      window.enhancedAnimateOut = function(slide) {
+        const elementsToAnimate = slide.querySelectorAll('.promo-image, .promo-gradient-bg, .promo-info-center, .faint-background-text, .promo-secondary-image-wrapper, .promo-header-mobile, .mobile-background-heading, .promo-features-grid-mobile');
+        animate(elementsToAnimate, { opacity: 0 }, { duration: 0.25 });
+      };
+      
+    } catch (error) {
+      console.log('Motion library not available, using basic animations.');
+    }
+  </script>
+{%- endif -%}
+
+<style>
+  .product-promo-container {
+    background: var(--slide-background);
+    color: var(--brand-primary-color-font-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 20px;
+    min-height: 85vh;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+  .faint-background-text, .promo-info-center, .promo-secondary-image-wrapper { display: none; }
+  .promo-header-mobile { text-align: center; opacity: 0; transition: opacity 0.3s ease; }
+  .promo-eyebrow { font-size: 14px; letter-spacing: 0.2em; font-weight: 600; color: var(--brand-primary-color-font-body); }
+  .promo-main-content-mobile {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    width: 100%;
+  }
+  .mobile-background-heading {
+    position: relative;
+    bottom: 25px;
+    font-size: clamp(4rem, 20vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.15);
+    margin: 0;
+    user-select: none;
+    -webkit-text-fill-color: initial;
+    background: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .promo-image-wrapper {
+    position: relative; z-index: 2; width: 100%; max-width: 400px;
+    flex-grow: 1; display: flex; align-items: center;
+  }
+  .promo-gradient-bg {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    background: radial-gradient(circle, var(--brand-accent-color) 0%, transparent 70%);
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .promo-image { 
+    width: 100%; height: auto; max-height: 50vh; object-fit: contain; 
+    opacity: 0; 
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .promo-features-grid-mobile {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .feature-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .feature-text { font-size: 12px; line-height: 1.4; font-weight: 500; max-width: 120px; margin: 0; color: var(--brand-primary-color-font-body); }
+  .product-promo-slider-wrapper .swiper-button-prev,
+  .product-promo-slider-wrapper .swiper-button-next { color: var(--brand-primary-color-font-body); }
+  .product-promo-slider-wrapper .swiper-pagination-bullet { background-color: var(--brand-primary-color-font-body); opacity: 0.6; }
+  .product-promo-slider-wrapper .swiper-pagination-bullet-active { opacity: 1; }
+
+  @media (min-width: 992px) {
+    .product-promo-container {
+      display: grid;
+      grid-template-columns: 45% 25% 30%;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      gap: 20px;
+    }
+    .promo-header-mobile, .promo-main-content-mobile, .promo-features-grid-mobile { display: none; }
+    .faint-background-text, .promo-info-center, .promo-secondary-image-wrapper { display: flex; }
+    .promo-image-wrapper {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+      transform: scale(1.1);
+      z-index: 2;
+      max-width: none;
+      flex-grow: 0;
+    }
+    .promo-info-center {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .desktop-heading {
+      color: var(--brand-primary-color-font-heading);
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+    }
+    .desktop-description { color: var(--brand-text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 2rem; }
+    .desktop-button {
+      background-color: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      border: 1px solid var(--btn-primary-border);
+      padding: var(--btn-padding-y) var(--btn-padding-x);
+      font-size: var(--btn-font-size);
+      font-weight: var(--btn-font-weight);
+      border-radius: var(--btn-border-radius);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .desktop-button:hover { background-color: var(--btn-primary-bg-hover); }
+    .promo-secondary-image-wrapper {
+      align-items: center;
+      justify-content: center;
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .promo-image-secondary { max-width: 100%; height: auto; }
+    .faint-background-text {
+      display: block;
+      position: absolute;
+      grid-column: 1 / -1;
+      grid-row: 1 / 2;
+      font-size: clamp(8rem, 18vw, 15rem);
+      font-weight: 800;
+      color: var(--brand-bg-muted-hover);
+      z-index: 1;
+      text-align: center;
+      line-height: 0.9;
+      user-select: none;
+      transform: translateX(-5%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero Product Slider",
+  "tag": "section",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable Autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "min": 2000,
+      "max": 9000,
+      "step": 1000,
+      "unit": "ms",
+      "label": "Autoplay Delay",
+      "default": 5000
+    },
+    {
+      "type": "header",
+      "content": "Global Styling"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Slide Background",
+      "default": "linear-gradient(90deg, rgba(4 179 68 / 0.05) 0%, rgba(27 102 239 / 0.05) 100%)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_slide",
+      "name": "Product Slide",
+      "settings": [
+        { "type": "header", "content": "Data Source" },
+        { "type": "product", "id": "featured_product", "label": "Product" },
+        { "type": "paragraph", "content": "The title is pulled from a product metafield with the key 'custom.short_title'. You can override this below." },
+        { "type": "header", "content": "Content Overrides" },
+        { "type": "text", "id": "eyebrow_text", "label": "Eyebrow Text (Mobile-only)" },
+        { "type": "textarea", "id": "heading", "label": "Heading", "info": "Overrides the product title. Use a new line for a line break." },
+        { "type": "image_picker", "id": "main_image", "label": "Main Image Override", "info": "Replaces the default image." },
+        { "type": "header", "content": "Desktop-only Content" },
+        {
+          "type": "textarea",
+          "id": "desktop_background_text",
+          "label": "Faint Background Text",
+          "info": "This text appears faintly in the background on desktop. Use new lines for breaks.",
+          "default": "AIR\nPODS\nMAX"
+        },
+        { "type": "richtext", "id": "description", "label": "Description", "default": "<p>A perfect balance of exhilarating high-fidelity audio and the effortless magic of AirPods.</p>" },
+        { "type": "paragraph", "content": "The secondary image is pulled from a product metafield with the key 'custom.hero_secondary' (File type). You can override this below." },
+        { "type": "image_picker", "id": "secondary_image", "label": "Secondary Image Override" },
+        { "type": "text", "id": "button_text", "label": "Button Text", "default": "Learn More" },
+        { "type": "url", "id": "button_link", "label": "Button Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Product Slider",
+      "blocks": [
+        { "type": "product_slide" },
+        { "type": "product_slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

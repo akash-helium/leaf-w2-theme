@@ -1,0 +1,39 @@
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  else
+    assign target = product
+  endif
+  
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+  assign money_price =  price  | divided_by: 100
+-%}
+
+<script type="text/javascript" src="https://pl-widget.capitalfloat.com/assets/widget/widget.js"></script>
+<script>
+        let _w369 = new w369({
+            button: {
+                show: false,
+                preferredLabel: '-1',
+                onClickCallBack: null
+            },
+            merchant: {
+                name: 'LeafStudios',
+                code: '8f0c3cd5-270e-434b-82dd-9f044f3cfc3d',
+                productMetaData: {
+                    type: '1',
+                    theme: '2'
+                },
+                amount: {{money_price}},
+                preferredTenure: 0
+            },
+            showCheckoutLine: true,
+            tagLine: {
+                text: 'w369_tenure interest-free EMIs of ₹w369_price with',
+                showText: true,
+                defaultText: 'Buy on interest-free EMIs with'
+            },
+            environment: "prod"
+        });
+    </script>

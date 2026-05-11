@@ -1,0 +1,636 @@
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+        <img src="https://cdn.shopify.com/s/files/1/0795/9858/4101/files/Adobe_Express_-_file.png?v=1748972075" alt="Leaf Logo" class="footer-logo" >
+      <p>We make Headphones for those who binge watch Movies and TV Shows. #BingeWithLeaf <br></br>
+  
+  Super Comfortable | Long Battery Life | Enhanced Sound with Leaf App
+  
+  </p>
+    </div>
+    <div class="footer-columns">
+     
+      <div class="footer-column">
+        <h4>Customer Care</h4>
+        
+  <ul>
+    <li><a href="/pages/faq">FAQ</a></li>
+    <li><a href="/pages/warranty-policy">Warranty Policy</a></li>
+    <li><a href="/pages/cancellation-policy">Cancellation Policy</a></li>
+    <li><a href="/pages/return-policy">Return Policy</a></li>
+    <li><a href="/pages/customer-care">Customer Care</a></li>
+    <li><a href="/pages/e-waste-management">E-Waste Management</a></li>
+    <li><a href="/pages/e-waste-management-studios">E-Waste Management (Studios)</a></li>
+  </ul>
+  
+        
+      </div>
+      <div class="footer-column">
+        <h4>Company</h4>
+       <ul>
+  <li><a href="/pages/about">About</a></li>
+  <li><a href="/pages/stories">Stories</a></li>
+  <li><a href="/pages/contact-us">Contact Us</a></li>
+</ul>
+
+      </div>
+      <div class="footer-column contacts">
+        <h4>Contacts</h4>
+        <ul>
+          {% if section.settings.contact_phone != blank %}
+            <li>{{ section.settings.contact_phone }}</li>
+          {% endif %}
+          {% if section.settings.contact_hours != blank %}
+            <li>{{ section.settings.contact_hours | newline_to_br }}</li>
+          {% endif %}
+          {% if section.settings.contact_email != blank %}
+            <li><a href="mailto:{{ section.settings.contact_email }}">{{ section.settings.contact_email }}</a></li>
+          {% endif %}
+          {% if section.settings.contact_address != blank %}
+            <li>{{ section.settings.contact_address }}</li>
+          {% endif %}
+        </ul>
+      </div>
+    
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="payment-section">
+      <p>Payment Available</p>
+      <div class="payment-icons">
+        <img src="{{ 'leaf_visa.png' | asset_url }}" alt="Visa" />
+        <img src="{{ 'Mastercard.png' | asset_url }}" alt="Mastercard" />
+        <img src="{{ 'leaf_amex.png' | asset_url }}" alt="American Express" />
+        <img src="{{ 'leaf_paypal.png' | asset_url }}" alt="PayPal" />
+        <img src="{{ 'leaf_discover.png' | asset_url }}" alt="Discover" />
+      </div>
+    </div>
+    <div class="social-section">
+      <p>Join Our Social Media</p>
+      <div class="social-links">
+        {% if section.settings.social_instagram_url != blank %}
+          {% if section.settings.social_instagram_url == '#' %} {# CHANGED HERE #}
+            <span class="social-icon-wrapper"><img src="{{ 'instagram_svg.png' | asset_url }}" alt="Instagram"></span>
+          {% else %}
+            <a href="{{ section.settings.social_instagram_url }}" target="_blank" rel="noopener" class="social-icon-wrapper"><img src="{{ 'instagram_svg.png' | asset_url }}" alt="Instagram"></a>
+          {% endif %}
+        {% endif %}
+
+        {% if section.settings.social_facebook_url != blank %}
+          {% if section.settings.social_facebook_url == '#' %} {# CHANGED HERE #}
+            <span class="social-icon-wrapper"><img src="{{ 'facbook_svg.png' | asset_url }}" alt="Facebook"></span>
+          {% else %}
+            <a href="{{ section.settings.social_facebook_url }}" target="_blank" rel="noopener" class="social-icon-wrapper"><img src="{{ 'facbook_svg.png' | asset_url }}" alt="Facebook"></a>
+          {% endif %}
+        {% endif %}
+
+        {% if section.settings.social_twitter_url != blank %}
+          {% if section.settings.social_twitter_url == '#' %} {# CHANGED HERE #}
+            <span class="social-icon-wrapper"><img src="{{ 'twitter_svg.png' | asset_url }}" alt="Twitter"></span>
+          {% else %}
+            <a href="{{ section.settings.social_twitter_url }}" target="_blank" rel="noopener" class="social-icon-wrapper"><img src="{{ 'twitter_svg.png' | asset_url }}" alt="Twitter"></a>
+          {% endif %}
+        {% endif %}
+
+        {% if section.settings.social_youtube_url != blank %}
+          {% if section.settings.social_youtube_url == '#' %} {# CHANGED HERE #}
+            <span class="social-icon-wrapper"><img src="{{ 'youtube_svg.png' | asset_url }}" alt="Youtube"></span>
+          {% else %}
+            <a href="{{ section.settings.social_youtube_url }}" target="_blank" rel="noopener" class="social-icon-wrapper"><img src="{{ 'youtube_svg.png' | asset_url }}" alt="Youtube"></a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-legal">
+    <p>© 2025 Leaf Studios. Powered by Helium Pulse</p>
+    <div class="legal-links">
+      <span>Terms of Service</span>
+      <span>Privacy Policy</span>
+      <span>Refund Policy</span>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+  {
+    "name": "Footer",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Contact Information"
+      },
+      {
+        "type": "text",
+        "id": "contact_phone",
+        "label": "Phone Number",
+        "default": "(0045) 78 73 72 7",
+        "info": "Leave blank to hide."
+      },
+      {
+        "type": "textarea",
+        "id": "contact_hours",
+        "label": "Operating Hours",
+        "default": "Mon–Fri\n09:00 – 15:30 CET",
+        "info": "Use a new line for each line of text."
+      },
+      {
+        "type": "text",
+        "id": "contact_email",
+        "label": "Email Address",
+        "default": "Leaf@hello.com",
+        "info": "Leave blank to hide."
+      },
+      {
+        "type": "text",
+        "id": "contact_address",
+        "label": "Address",
+        "default": "Gurgaon, HR",
+        "info": "Leave blank to hide."
+      },
+      {
+        "type": "header",
+        "content": "Social Media Links"
+      },
+      {
+        "type": "url",
+        "id": "social_instagram_url",
+        "label": "Instagram URL",
+        "info": "Enter the full URL to your Instagram profile. Leave '#' to disable link but show text."
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_url",
+        "label": "Facebook URL",
+        "info": "Enter the full URL to your Facebook profile. Leave '#' to disable link but show text."
+      },
+      {
+        "type": "url",
+        "id": "social_twitter_url",
+        "label": "Twitter URL",
+        "info": "Enter the full URL to your Twitter profile. Leave '#' to disable link but show text."
+      },
+       {
+        "type": "url",
+        "id": "social_youtube_url",
+        "label": "Youtube URL",
+        "info": "Enter the full URL to your Youtube profile. Leave '#' to disable link but show text."
+      }
+    ],
+    "blocks": [
+      {
+        "type": "shop_collection_link",
+        "name": "Collection Link",
+        "settings": [
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "Select Collection",
+            "info": "Choose a collection to link to."
+          }
+        ]
+      }
+    ],
+    "max_blocks": 7,
+    "presets": [
+      {
+        "name": "Footer"
+      }
+    ]
+  }
+{% endschema %}
+
+<style>
+.footer {
+  background: #141414;
+  color: #fff;
+  font-family: sans-serif;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.footer * {
+  box-sizing: border-box;
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap:40px;
+  border-bottom: 1px solid #333;
+  width: 100%;
+  max-width: 100%;
+  padding: 60px 20px;
+}
+
+.footer-brand {
+  flex: 0 0 auto;
+  max-width: 500px;
+  width: 100%;
+  margin-left:80px;
+}
+
+.footer-brand img {
+  width: 100px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.footer-brand p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer-columns {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 150px;
+}
+
+.footer-column h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.footer-column ul li a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+
+
+.contacts ul li {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  cursor: default;
+}
+
+.contacts ul li a {
+
+  text-decoration: none;
+}
+
+
+.newsletter {
+  max-width: 300px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.newsletter-content p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.newsletter-content form {
+  display: flex;
+  margin: 15px 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.newsletter-content input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #333;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.newsletter-content input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-content button {
+  padding: 10px 16px;
+  background: #444;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.newsletter-content button:hover {
+  background: #555;
+}
+
+.newsletter-content small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  word-wrap: break-word;
+}
+
+.newsletter-content small a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 20px;
+  border-bottom: 1px solid #333;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-bottom p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 10px 0;
+  font-size: 13px;
+}
+
+.payment-section {
+  flex: 1;
+  min-width: 150px;
+}
+
+.social-section {
+  flex: 1;
+  min-width: 150px;
+  text-align: right;
+}
+
+.payment-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.payment-icons img {
+  height: 24px;
+  width: auto;
+  max-width: 100%;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.social-links .social-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: auto;
+  transition: color 0.2s ease;
+}
+
+.social-links .social-icon-wrapper img {
+  height: 24px;
+  width: auto;
+  vertical-align: middle;
+  transition: filter 0.2s ease;
+  filter: brightness(0) invert(1);
+}
+
+.social-links a.social-icon-wrapper:hover img,
+.social-links span.social-icon-wrapper:hover img {
+  filter: brightness(0) invert(1) brightness(1.2); 
+}
+
+.social-links a.social-icon-wrapper {
+  text-decoration: none;
+}
+
+.social-links span,
+.social-links a {
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.social-links span:hover,
+.social-links a:hover {
+  color: #fff;
+}
+
+.footer-legal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 25px 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.footer-legal p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  word-wrap: break-word;
+}
+
+.legal-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.legal-links span {
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.legal-links span:hover {
+  color: #fff;
+}
+
+@media (max-width: 748px) {
+  .footer-top {
+    flex-direction: column;
+    padding: 30px 15px;
+    gap: 30px;
+  }
+  
+  .footer-brand {
+    max-width: 100%;
+    text-align: left;
+    margin-left:0px;
+  }
+  
+  .footer-columns {
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .footer-column {
+    min-width: 100%;
+  }
+  
+  .footer-column h4 {
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: 0;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .footer-column h4::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+  }
+  
+  .footer-column ul,
+  .footer-column .newsletter-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .footer-column.active ul,
+  .footer-column.active .newsletter-content {
+    max-height: 500px;
+    padding-top: 15px;
+  }
+  
+  .footer-column.active h4::after {
+    transform: rotate(180deg);
+  }
+  
+  .newsletter {
+    max-width: 100%;
+  }
+  
+  .newsletter-content form {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .newsletter-content input {
+    margin: 0;
+    width: 100%;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 25px;
+    padding: 25px 15px;
+    text-align: left;
+  }
+  
+  .payment-section,
+  .social-section {
+    width: 100%;
+    text-align: left;
+  }
+  
+  .payment-icons {
+    justify-content: flex-start;
+  }
+  
+  .payment-icons img {
+    height: 20px;
+  }
+  
+  .social-links {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .footer-legal {
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px 15px;
+    text-align: left;
+  }
+  
+  .legal-links {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const footerColumns = document.querySelectorAll('.footer-column');
+  const mobileBreakpoint = 748;
+
+  function setupAccordion() {
+    footerColumns.forEach(column => {
+      const header = column.querySelector('h4');
+      if (header) {
+        header.removeEventListener('click', toggleColumn); 
+        if (window.innerWidth <= mobileBreakpoint) {
+          header.addEventListener('click', toggleColumn);
+        } else {
+          column.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  function toggleColumn() {
+    const clickedColumn = this.closest('.footer-column');
+    
+    clickedColumn.classList.toggle('active');
+    
+    footerColumns.forEach(otherColumn => {
+      if (otherColumn !== clickedColumn && otherColumn.classList.contains('active')) {
+        otherColumn.classList.remove('active');
+      }
+    });
+  }
+
+  setupAccordion();
+
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(setupAccordion, 250);
+  });
+});
+</script>

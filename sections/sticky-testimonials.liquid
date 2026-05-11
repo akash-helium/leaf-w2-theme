@@ -1,0 +1,401 @@
+{% style %}
+  .sticky-reviews-wrapper {
+    position: relative;
+    height: var(--section-height, 400vh);
+    background-color: var(--brand-bg, #ffffff);
+    color: var(--brand-primary-color-font-body, #333333);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .sticky-reviews-wrapper .background-text {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 20%;
+    z-index: 1;
+    width: 100%;
+    font-size: clamp(2rem, 20vw, 10rem);
+    font-weight: 600;
+    line-height: 0.9;
+    text-align: center;
+    color: var(--brand-bg-muted, #f5f5f5);
+    user-select: none;
+    -webkit-user-select: none;
+    will-change: opacity;
+    padding: 10px 20px;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .sticky-reviews-wrapper .background-text p {
+    margin: 0;
+  }
+
+  .sticky-reviews-wrapper .review-cards-container {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .sticky-reviews-wrapper .review-card {
+    position: absolute;
+    width: clamp(200px, 22vw, 350px);
+    
+    /* Using a modern CSS function to create transparency */
+    background-color: color-mix(in srgb, var(--brand-bg-muted, #f9f9f9) 85%, transparent);
+    color: var(--brand-primary-color-font-body, #333333);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    border: 1px solid var(--brand-border-muted, #e0e0e0);
+    will-change: transform;
+    display: flex;
+    font-size: 12px;
+    flex-direction: column;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: transform 0.1s ease-out;
+
+    /* --- SAFARI FIX --- */
+    /* This forces the element onto its own compositing layer, which often fixes backdrop-filter rendering bugs during transforms. */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .sticky-reviews-wrapper .review-card__stars {
+    color: var(--brand-accent-color, #ffd700);
+    font-size: 12px;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  .sticky-reviews-wrapper .review-card__text {
+    margin: 0 0 8px 0;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+
+  .sticky-reviews-wrapper .review-card__author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .sticky-reviews-wrapper .review-card__author-image {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .sticky-reviews-wrapper .review-card__author-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sticky-reviews-wrapper .review-card__author-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--brand-primary-color-font-heading, #222222);
+  }
+
+  .sticky-reviews-wrapper .review-card__author-subtitle {
+    font-size: 0.75rem;
+    color: var(--brand-border-muted-hover, #999999);
+  }
+
+
+  @supports not (backdrop-filter: blur(10px)) {
+    .sticky-reviews-wrapper .review-card {
+      background-color: rgba(255, 255, 255, 0.3);
+
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .sticky-reviews-wrapper .review-card {
+      width: 30vw; min-width: 180px; max-width: 280px; font-size: 11px;
+    }
+    .sticky-reviews-wrapper .background-text { font-size: 6rem; }
+  }
+  @media (max-width: 768px) {
+    .sticky-reviews-wrapper .review-card {
+      width: 35vw; min-width: 160px; max-width: 250px; font-size: 10px; padding: 10px;
+    }
+    .sticky-reviews-wrapper .background-text { font-size: 4rem; }
+  }
+  @media (max-width: 480px) {
+    .sticky-reviews-wrapper .review-card {
+      width: 45vw; min-width: 140px; max-width: 200px;
+    }
+    .sticky-reviews-wrapper .background-text { font-size: 2.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-reviews-wrapper .review-card, .sticky-reviews-wrapper .background-text {
+      transition: none !important;
+    }
+  }
+{% endstyle %}
+
+{% comment %}
+  ------------------------------------------------------------------------------------
+  SECTION HTML (LIQUID)
+  - Uses section.id to create a unique ID for the wrapper.
+  - Loops through blocks to render each review card.
+  - Block settings are used to dynamically set content and position.
+  - REFACTORED to remove inline color settings.
+  ------------------------------------------------------------------------------------
+{% endcomment %}
+<div
+  id="sticky-reviews-{{ section.id }}"
+  class="sticky-reviews-wrapper"
+  style="--section-height: {{ section.settings.section_height }}vh;"
+>
+  {% if section.settings.heading != blank %}
+    <div class="background-text">
+      {{ section.settings.heading }}
+    </div>
+  {% endif %}
+
+  <div class="review-cards-container">
+    {% for block in section.blocks %}
+      <div
+        class="review-card"
+        style="
+          {{ block.settings.horizontal_anchor }}: {{ block.settings.horizontal_position }}%;
+          top: {{ block.settings.vertical_position }}%;
+        "
+        {{ block.shopify_attributes }}
+      >
+        <div class="review-card__stars">
+          {% for i in (1..block.settings.rating) %}★{% endfor %}
+        </div>
+        
+        {% if block.settings.review_text != blank %}
+          <div class="review-card__text">{{ block.settings.review_text }}</div>
+        {% endif %}
+
+        <div class="review-card__author">
+          {% if block.settings.author_image != blank %}
+            <img
+              class="review-card__author-image"
+              src="{{ block.settings.author_image | image_url: width: 80, height: 80, crop: 'center' }}"
+              alt="{{ block.settings.author_image.alt | escape }}"
+              width="40"
+              height="40"
+            >
+          {% endif %}
+          <div class="review-card__author-info">
+            {% if block.settings.author_name != blank %}
+              <span class="review-card__author-name">{{ block.settings.author_name }}</span>
+            {% endif %}
+            {% if block.settings.author_subtitle != blank %}
+              <span class="review-card__author-subtitle">{{ block.settings.author_subtitle }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% comment %}
+  ------------------------------------------------------------------------------------
+  SECTION JAVASCRIPT
+  - No changes were needed here. The animation logic is independent of the styling.
+  ------------------------------------------------------------------------------------
+{% endcomment %}
+{% javascript %}
+  // Import animation libraries from CDN
+  const motionModule = import("https://cdn.skypack.dev/motion");
+
+  const initStickyReviews = (sectionEl) => {
+    motionModule.then(({ scroll, animate }) => {
+      const cards = sectionEl.querySelectorAll(".review-card");
+      const backgroundText = sectionEl.querySelector(".background-text");
+      cards.forEach((card, index) => {
+        const animation = animate(
+          card,
+          { transform: ["translateY(100vh)", "translateY(-100vh)"] },
+          { delay: index * 0.05, duration: 1 }
+        );
+        scroll(animation, {
+          target: sectionEl,
+          offset: ["start end", "end start"],
+        });
+      });
+
+      if (backgroundText) {
+        scroll(
+          animate(
+            backgroundText,
+            { opacity: [0, 1, 1, 0] }
+          ),
+          {
+            target: sectionEl,
+            offset: ["start end", "end end"],
+          }
+        );
+      }
+    });
+  };
+
+  // Self-executing function to find and initialize all instances of the section
+  (() => {
+    const sectionId = "sticky-reviews-{{ section.id }}";
+    const sectionElement = document.getElementById(sectionId);
+    
+    if (sectionElement) {
+      initStickyReviews(sectionElement);
+    }
+    
+    document.addEventListener("shopify:section:load", (event) => {
+      if (event.target.id === sectionId) {
+        initStickyReviews(event.target);
+      }
+    });
+  })();
+{% endjavascript %}
+
+{% comment %}
+  ------------------------------------------------------------------------------------
+  SECTION SCHEMA
+  - Defines the settings available in the Shopify Theme Editor.
+  - REFACTORED to remove color settings, making the section inherit brand styles.
+  ------------------------------------------------------------------------------------
+{% endcomment %}
+{% schema %}
+{
+  "name": "Sticky Scroll Reviews",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Main Heading",
+      "default": "<p>What they<br>are saying</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 100,
+      "max": 800,
+      "step": 50,
+      "unit": "vh",
+      "label": "Scroll Duration",
+      "info": "Higher values make the scroll animation last longer. 400vh means it lasts for 4 screen heights.",
+      "default": 400
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Review Card",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Card Content"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "label": "Star Rating",
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "review_text",
+          "label": "Review Text",
+          "default": "This is a fantastic product. It completely changed my routine for the better and I couldn't be happier with the results."
+        },
+        {
+          "type": "image_picker",
+          "id": "author_image",
+          "label": "Author Image"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author Name",
+          "default": "Alex Johnson"
+        },
+        {
+          "type": "text",
+          "id": "author_subtitle",
+          "label": "Author Subtitle",
+          "default": "Verified Buyer"
+        },
+        {
+          "type": "header",
+          "content": "Card Positioning"
+        },
+        {
+          "type": "radio",
+          "id": "horizontal_anchor",
+          "label": "Anchor Side",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position",
+          "min": 0,
+          "max": 80,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal Position",
+          "info": "How far from the selected anchor side. (e.g., 10% from the left edge)",
+          "default": 15
+        },
+        {
+          "type": "range",
+          "id": "vertical_position",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical Start Position",
+          "info": "The card's starting position from the top of the screen. Adjust this to create overlaps.",
+          "default": 25
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky Scroll Reviews",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+
+

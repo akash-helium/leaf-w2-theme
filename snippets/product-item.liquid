@@ -1,0 +1,769 @@
+{% comment %} <div class="ProductItem {% if use_horizontal %}ProductItem--horizontal{% endif %}">
+  <div class="ProductItem__Wrapper">
+    {%- comment -%}
+    We are using LazySizes to efficiently choose the most appropriate image in the set. However, because internally LazySizes uses srcset, we need to make
+    sure that the image sizes we offer is not larger than the max size uploaded by the merchants.
+    {%- endcomment -%}
+
+    {%- if settings.product_image_size == 'natural' or use_horizontal -%}
+      {%- assign use_natural_size = true -%}
+    {%- else -%}
+      {%- assign use_natural_size = false -%}
+    {%- endif -%}
+
+    {%- if settings.product_show_secondary_image and product.images[1] != blank and use_horizontal != true -%}
+      {%- assign has_alternate_image = true -%}
+    {%- else -%}
+      {%- assign has_alternate_image = false -%}
+    {%- endif -%}
+
+    <a href="{{ product.url | within: collection }}" class="ProductItem__ImageWrapper {% if has_alternate_image %}ProductItem__ImageWrapper--withAlternateImage{% endif %}">
+      {%- if use_horizontal -%}
+        {%- assign max_width = 125 -%}
+      {%- else -%}
+        {%- assign max_width = product.featured_image.width -%}
+      {%- endif -%}
+
+      <div class="AspectRatio AspectRatio--{% if use_natural_size %}withFallback{% else %}{{ settings.product_image_size }}{% endif %}" style="max-width: {{ max_width }}px; {% if use_natural_size %}padding-bottom: {{ 100.0 | divided_by: product.featured_image.aspect_ratio }}%;{% endif %} --aspect-ratio: {{ product.featured_image.aspect_ratio }}">
+        {%- comment -%}
+        IMPLEMENTATION NOTE: The alternate image (not visible by default) should be the first in the DOM, as the spinner (Image__Loader element) is
+        displayed based on the immediately previously shown image.
+        {%- endcomment -%}
+
+        {%- if has_alternate_image -%}
+          {%- include 'image-size', sizes: '200,300,400,600,800,900,1000,1200', image: product.images[1] -%}
+          {%- assign image_url = product.images[1] | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+
+          <img class="ProductItem__Image ProductItem__Image--alternate Image--lazyLoad Image--fadeIn" data-src="{{ image_url }}" data-widths="[{{ supported_sizes }}]" data-sizes="auto" alt="{{ product.images[1].alt | escape }}" data-image-id="{{ product.images[1].id }}">
+        
+              {%- endif -%}
+
+        {%- include 'image-size', sizes: '200,400,600,700,800,900,1000,1200', image: product.featured_image -%}
+        {%- assign image_url = product.featured_image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+{% comment %}
+        <img class="ProductItem__Image Image--lazyLoad Image--fadeIn 1" data-src="{{ image_url }}" data-widths="[{{ supported_sizes }}]" data-sizes="auto" alt="{{ product.featured_image.alt | escape }}" data-image-id="{{ product.featured_image.id }}">
+       {% endcomment %}
+        <img class="ProductItem__Image" src="{{ product.featured_image |img_url:"master" }}" data-widths="[{{ supported_sizes }}]" data-sizes="auto" alt="{{ product.featured_image.alt | escape }}" data-image-id="{{ product.featured_image.id }}">
+        <span class="Image__Loader"></span>
+
+        <noscript>
+          <img class="ProductItem__Image ProductItem__Image--alternate" src="{{ product.images[1] | img_url: '600x' }}" alt="{{ product.images[1].alt | escape }}">
+          <img class="ProductItem__Image" src="{{ product.featured_image | img_url: '600x' }}" alt="{{ product.featured_image.alt | escape }}">
+        </noscript>
+      </div>
+    </a>
+
+    {%- if show_labels -%}
+      {%- capture product_labels -%}
+        {%- for tag in product.tags -%}
+          {%- if tag contains '__label' -%}
+            <span class="ProductItem__Label Heading Text--subdued">{{ tag | split: '__label:' | last }}</span>
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if product.available -%}
+          {%- if product.compare_at_price > product.price -%}
+            <span class="ProductItem__Label Heading Text--subdued">{{ 'product.labels.on_sale' | t }}</span>
+          {%- endif -%}
+        {%- else -%}
+          <span class="ProductItem__Label Heading Text--subdued">{{ 'product.labels.sold_out' | t }}</span>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- if product_labels != blank -%}
+        <div class="ProductItem__LabelList">
+          {{ product_labels }}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_product_info -%}
+      <div class="ProductItem__Info {% unless use_horizontal %}ProductItem__Info--{{ settings.product_info_alignment }}{% endunless %}">
+        {%- if show_vendor -%}
+          <p class="ProductItem__Vendor Heading">{{ product.vendor }}</p>
+        {%- endif -%}
+
+        <h2 class="ProductItem__Title Heading">
+          <a href="{{ product.url | within: collection }}">{{ product.title }}</a>
+        </h2>
+{% comment %}Start automatically added Judge.me widget{% endcomment %}
+  {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
+{% comment %}End automatically added Judge.me widget{% endcomment %}
+
+
+        {%- if show_color_swatch -%}
+          {%- assign color_swatch_list = '' -%}
+
+          {%- capture color_swatch -%}
+            {%- capture color_name -%}{{ section.id }}-{{ product.id }}-{% increment color_name %}{%- endcapture -%}
+
+            {%- for option in product.options_with_values -%}
+              {%- assign downcased_option = option.name | downcase -%}
+
+              {%- if downcased_option == 'color' or downcased_option == 'colour' or downcased_option == 'couleur' -%}
+                {%- assign variant_option = 'option' | append: forloop.index -%}
+
+                {%- for value in option.values -%}
+                  {%- assign downcased_value = value | downcase -%}
+                  {%- capture color_id -%}{{ section.id }}-{{ product.id }}-{% increment color_index %}{%- endcapture -%}
+
+                  {%- for variant in product.variants -%}
+                    {%- if variant[variant_option] == value -%}
+                      {%- assign variant_for_value = variant -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  <div class="ProductItem__ColorSwatchItem">
+                    {%- if variant_for_value.image -%}
+                      {%- include 'image-size', sizes: '200,400,600,700,800,900,1000,1200', image: variant_for_value.image -%}
+                      {%- assign variant_image_url = variant_for_value.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+                    {%- endif -%}
+
+                    <input class="ColorSwatch__Radio" type="radio" name="{{ color_name }}" id="{{ color_id }}" value="{{ value | escape }}" {% if option.selected_value == value %}checked="checked"{% endif %} data-variant-url="{{ variant_for_value.url }}{% if variant_for_value.image %}#Image{{ variant_for_value.image.id }}{% endif %}" {% if variant_for_value.image %}data-image-id="{{ variant_for_value.image.id }}" data-image-url="{{ variant_image_url }}" data-image-widths="[{{ supported_sizes }}]" data-image-aspect-ratio="{{ variant_for_value.image.aspect_ratio }}"{% endif %} aria-hidden="true">
+                    <label class="ColorSwatch ColorSwatch--small" for="{{ color_id }}" style="background-color: {{ value | replace: ' ', '' | downcase }}; background-image: url({{ value | handle | append: '.png' | asset_url }})" title="{{ value | escape }}" data-tooltip="{{ value | escape }}"></label>
+                  </div>
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+
+          {%- if color_swatch != blank -%}
+            {%- capture color_swatch_list -%}
+              <div class="ProductItem__ColorSwatchList">
+                {{- color_swatch -}}
+              </div>
+            {%- endcapture -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if show_price_on_hover == nil -%}
+          {%- assign show_price_on_hover = settings.product_show_price_on_hover -%}
+        {%- endif -%}
+
+        {%- if show_price_on_hover and color_swatch_list != blank -%}
+          {{- color_swatch_list -}}
+        {%- endif -%}
+
+        {%- if product.template_suffix != 'coming-soon' -%}
+          <div class="ProductItem__PriceList {% if show_price_on_hover %}ProductItem__PriceList--showOnHover{% endif %} Heading">
+            {%- if product.compare_at_price > product.price -%}
+              <span class="ProductItem__Price Price Price--highlight Text--subdued" data-money-convertible>{{ product.price | money_without_trailing_zeros }}</span>
+              <span class="ProductItem__Price Price Price--compareAt Text--subdued" data-money-convertible>{{ product.compare_at_price | money_without_trailing_zeros }}</span>
+            {%- elsif product.price_varies -%}
+              {%- capture formatted_min_price -%}<span data-money-convertible>{{ product.price_min | money_without_trailing_zeros }}</span>{%- endcapture -%}
+              {%- capture formatted_max_price -%}<span data-money-convertible>{{ product.price_max | money_without_trailing_zeros }}</span>{%- endcapture -%}
+              <span class="ProductItem__Price Price Text--subdued">{{ 'collection.product.from_price_html' | t: min_price: formatted_min_price, max_price: formatted_max_price }}</span>
+            {%- else -%}
+              <span class="ProductItem__Price Price Text--subdued" data-money-convertible>{{ product.price | money_without_trailing_zeros }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if show_price_on_hover == false and color_swatch_list != blank -%}
+          {{- color_swatch_list -}}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if use_horizontal -%}
+    <a href="{{ associated_product.url }}" class="ProductItem__ViewButton Button Button--secondary hidden-pocket">{{ 'collection.product.view_product' | t }}</a>
+  {%- endif -%}
+</div> {% endcomment %}
+
+
+{% comment %}
+  Product Card Component
+  - Video support via metafields (custom.is_video, custom.url_video)
+  - Image Carousel on hover with auto-swipe
+  - Feature "Pillets" via metafield (custom.pillets - List of Text)
+  - Judge.me ratings integration
+  - slide-up "Add to Cart" on hover
+{% endcomment %}
+
+
+{%- assign pillets = product.metafields.custom.feature_list.value -%}
+{%- assign first_variant = product.selected_or_first_available_variant -%}
+
+<!-- Calculate Discount Percentage Logic -->
+{%- assign discount_percent = 0 -%}
+{%- if product.compare_at_price > product.price -%}
+  {%- assign savings = product.compare_at_price | minus: product.price -%}
+  {%- assign discount_percent = savings | times: 100.0 | divided_by: product.compare_at_price | round -%}
+{%- endif -%}
+
+<product-card class="product-card" data-product-handle="{{ product.handle }}">
+  <div class="product-card__media-container">
+   <div class="product-media-slider first-slider">
+  
+  <div class="media-wrapper">
+    {% for image in product.images %}
+      <div class="media-item">
+        <a href="{{ product.url }}"><img src="{{ image | img_url: 'master' }}" alt="{{ product.title }}"></a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <button class="arrow left">‹</button>
+  <button class="arrow right">›</button>
+
+</div>
+  </div>
+
+  <div class="product-card__info">
+
+    <div class="title-wrapper">
+      <a href="{{ product.url }}" class="product-card__title-link">
+        <h3 class="product-card__title">{{ product.title }}</h3>
+      </a>
+    </div>
+     <div class="product-card__rating">
+        {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
+      </div>
+
+      {% if pillets.size > 0 %}
+        <div class="product-card__pillets">
+          {% for pillet in pillets limit: 2 %}
+            <span class="pillet-badge">
+              {{ pillet }}{% if forloop.index < pillets.size and forloop.index < 2 %} |{% endif %}
+            </span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+
+    <div class="product-card__footer">
+      <div class="product-card__price-container">
+
+  <span class="price-final">
+    {{ product.price | money_without_trailing_zeros 
+              | replace: "Rs.", "" 
+              | replace: "Rs", "" 
+              | strip 
+              | prepend: "₹ "  }}
+  </span>
+
+  {% if product.compare_at_price > product.price and discount_percent > 0 %}
+    <span class="price-original">
+      {{ product.compare_at_price  | money_without_trailing_zeros 
+              | replace: "Rs.", "" 
+              | replace: "Rs", "" 
+              | strip 
+              | prepend: "₹ "  }}
+    </span>
+
+    <span class="price-discount">
+      {{ discount_percent }}% OFF
+    </span>
+  {% endif %}
+
+</div>
+
+
+    </div>
+
+    <div class="product-card__actions">
+      {% form 'product', product %}
+        <input type="hidden" name="id" value="{{ first_variant.id }}">
+        <button type="submit" class="btn-add-to-cart" {% unless first_variant.available %}disabled{% endunless %}>
+          {% if first_variant.available %}
+            Add to Cart
+          {% else %}
+            Sold Out
+          {% endif %}
+        </button>
+      {% endform %}
+    </div>
+
+  </div>
+</product-card>
+
+
+<style>
+    #main{
+    margin:-40px 0px;
+    }
+
+  .product-card {
+    display: block;
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    width: 100%;
+  }
+
+  .product-card__media-container {
+    position: relative;
+    aspect-ratio: 1/1;
+    background: rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+  }
+
+  .product-card__carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .top-right-chevron {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    color: #000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .product-card:hover .top-right-chevron {
+    transform: rotate(-45deg);
+    display:flex;
+  }
+
+  .product-card__carousel-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s ease;
+  }
+
+  .product-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    flex-shrink: 0;
+    padding: 0 20px;
+  }
+
+  /* --- Carousel Navigation --- */
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    background: rgba(0,0,0,0.05);
+    border: none;
+    width: 24px; height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .product-card:hover .carousel-nav { opacity: 1; }
+  .carousel-nav:hover { background: #000; color: #fff; }
+  .carousel-prev { left: 0px; }
+  .carousel-next { right: 0px; }
+
+
+  /* Progress Bar */
+  .carousel-progress-bar {
+    position: absolute;
+    width: 70%;
+    height: 8px; 
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #e5e5e5;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 0 auto;
+    bottom: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 10; 
+    cursor: pointer; 
+    touch-action: none; 
+  }
+
+  .product-card:hover .carousel-progress-bar {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .carousel-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #111;
+    border-radius: 9999px;
+    width: 0%;
+    transition: all 0.3s ease-in-out;
+  }
+
+
+  .product-card__info { padding: 15px; }
+  .product-card__title-link { text-decoration: none; color: inherit; }
+  .product-card__title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    transition: font-weight 0.2s ease;
+    color:black;
+  }
+  .product-card:hover .product-card__title { font-weight: 700; }
+
+  .product-card__pillets {
+    width:100%;
+  }
+  {% comment %} .pillet-badge {
+    color: #555;
+    font-size: 11px;
+    font-weight: 500;
+    background: linear-gradient(90deg, rgba(4, 179, 68, 0.05) 0%, rgba(27, 102, 239, 0.05) 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 4px 10px;
+    width:100%;
+    border-radius: 8px;
+  } {% endcomment %}
+
+
+  .pillet-badge {
+    color: #999999;
+    font-size: 12px;
+    text-transform:capitalize;
+    font-weight: 500;
+    padding:2px 0px;
+    width:100%;
+    border-radius: 8px;
+  } 
+  
+
+  .product-card__footer {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* --- NEW PRICE STYLES START --- */
+  .product-card__price-container {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .price-final {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .price-original {
+    font-size: 14px;
+    color: #8e8e8e; /* Gray */
+    text-decoration: line-through;
+    font-weight: 400;
+  }
+
+  .price-discount {
+    font-size: 14px;
+    color: #1a8f3e; /* Green */
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  /* --- NEW PRICE STYLES END --- */
+
+
+  .title-wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.title-wrapper h3 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.product-card__rating {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Make Judge.me text (17 reviews) styled correctly */
+.product-card__rating .jdgm-prev-badge__text {
+  margin-left: 4px;
+  font-size: 10px;
+  margin-top:4px;
+
+}
+
+
+
+  .product-card__rating .jdgm-prev-badge {
+    display: flex !important; align-items: center;
+  }
+    .product-card__rating .jdgm-prev-badge .jdgm-star{
+    font-size:0.6rem;
+  }
+
+  
+  .product-card__actions {
+    margin-top: 5px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease-in-out;
+    pointer-events: none;
+  }
+  .product-card:hover .product-card__actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .btn-add-to-cart {
+    width: 100%;
+    padding: 4px 12px;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid black;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-add-to-cart:hover { background-color: #333; color:#fff;}
+
+ 
+@media (max-width: 767px) {
+  .carousel-progress-bar {
+    height:4px;
+     opacity: 1 !important;
+    visibility: visible !important;
+    width:50%;
+    bottom: 3px;
+  }
+
+  .product-card__info{ padding:15px 0px }
+  .product-card__carousel{ padding-bottom:10px; }
+
+  .product-card__media-container {
+    aspect-ratio: 1/1 !important;
+  }
+   .product-card__pillets{
+  line-height:1.1;
+      font-size:10px;
+
+
+
+  }
+  .product-card__pillets .pillet-badge:nth-child(n+2) {
+    {% comment %} display: none !important; {% endcomment %}
+  }
+  .product-card__actions{ display:none; }
+  .product-card__pillets .pillet-badge{ width:auto;  }
+  
+  .product-card__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    text-transform: uppercase; 
+    letter-spacing:0px;
+    transition: font-weight 0.2s ease;
+  }
+  
+  /* --- MOBILE PRICE ADJUSTMENTS --- */
+  .product-card__price-container {
+    margin-top: 5px;
+    gap: 6px;
+  }
+  .price-final { font-size: 0.9rem; }
+  .price-original { font-size: 0.75rem; }
+  .price-discount { font-size: 0.75rem; }
+  
+  /* Rating Mobile */
+  .product-card .jdgm-prev-badge__text{ font-size: 0.7rem; }
+  .product-card__rating .jdgm-prev-badge {
+    display: flex !important; align-items: center;
+    font-size: 0.7rem;
+  }
+  .product-cart__rating .jdgm-prev-badge__stars .jdgm-star jdgm--on{
+    width:10px;
+    height:10px;
+  }
+
+  .carousel-nav {
+    pointer-events: auto;
+    z-index: 5;
+  }
+  .product-card__link {
+    position: relative;
+    display: block;
+    pointer-events: auto;
+  }
+  .title-wrapper{
+  display:flex;
+  flex-direction:column;
+  }
+  .title-wrapper .product-card__title-link{
+  display:block;
+  }
+  .product-card__rating{
+  display:block;}
+
+   #main{
+    margin:-30px 0px;
+    padding-bottom:40px;
+    }
+.product-card__media-container{
+display:flex;
+justify-content:center;}
+}
+
+
+</style>
+
+<script>
+  class ProductCard extends HTMLElement {
+    constructor() {
+      super();
+      this.track = this.querySelector('.product-card__carousel-track');
+      this.images = this.querySelectorAll('.product-card__img');
+      this.prevBtn = this.querySelector('.carousel-prev');
+      this.nextBtn = this.querySelector('.carousel-next');
+      this.progressBar = this.querySelector('.carousel-progress-bar');
+      this.progressFill = this.querySelector('.carousel-progress-fill');
+      this.currentIndex = 0;
+      this.interval = null;
+      this.isDraggingBar = false; 
+      this.init();
+    }
+
+    init() {
+      const imageCount = this.images.length;
+
+      if (imageCount <= 1 && this.progressBar) {
+        this.progressBar.style.display = 'none';
+      }
+
+      if (this.prevBtn && this.nextBtn) {
+        [this.prevBtn, this.nextBtn].forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+        });
+
+        this.prevBtn.addEventListener('click', () => {
+          this.stopAutoSwipe();
+          this.showImage(this.currentIndex - 1);
+        });
+
+        this.nextBtn.addEventListener('click', () => {
+          this.stopAutoSwipe();
+          this.showImage(this.currentIndex + 1);
+        });
+      }
+
+      if (this.progressBar && imageCount > 1) {
+        this.progressBar.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation(); 
+          this.handleBarInteraction(e);
+        });
+
+        this.progressBar.addEventListener('mousedown', (e) => {
+          this.isDraggingBar = true;
+          this.stopAutoSwipe();
+        });
+
+        this.addEventListener('mousemove', (e) => {
+          if (!this.isDraggingBar) return;
+          e.preventDefault(); 
+          this.handleBarInteraction(e);
+        });
+
+        document.addEventListener('mouseup', () => {
+          this.isDraggingBar = false;
+        });
+      }
+
+      this.addEventListener('mouseenter', () => this.stopAutoSwipe());
+      this.addEventListener('mouseleave', () => {
+        this.isDraggingBar = false; 
+        this.startAutoSwipe();
+      });
+
+      this.startAutoSwipe();
+      this.updateProgress();
+    }
+
+    handleBarInteraction(e) {
+      const rect = this.progressBar.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const totalWidth = rect.width;
+      
+      if (totalWidth === 0) return;
+
+      const percentage = offsetX / totalWidth;
+      let targetIndex = Math.floor(percentage * this.images.length);
+
+      targetIndex = Math.max(0, Math.min(targetIndex, this.images.length - 1));
+
+      if (targetIndex !== this.currentIndex) {
+        this.showImage(targetIndex);
+      }
+    }
+
+    showImage(index) {
+      if (!this.images.length) return;
+
+      this.currentIndex = (index + this.images.length) % this.images.length;
+      
+      const offset = -this.currentIndex * 100;
+      this.track.style.transform = `translateX(${offset}%)`;
+
+      this.updateProgress();
+    }
+
+    updateProgress() {
+      if (!this.progressFill || this.images.length <= 1) return;
+
+      const chipWidth = 100 / this.images.length;
+      this.progressFill.style.width = `${chipWidth}%`;
+      const translatePercent = this.currentIndex * 100; 
+      this.progressFill.style.transform = `translateX(${translatePercent}%)`; 
+    }
+
+    startAutoSwipe() {
+      this.stopAutoSwipe();
+      if (this.images.length > 1) {
+        this.interval = setInterval(() => {
+          this.showImage(this.currentIndex + 1);
+        }, 3000);
+      }
+    }
+
+    stopAutoSwipe() {
+      clearInterval(this.interval);
+    }
+  }
+
+  if (!customElements.get('product-card')) {
+    customElements.define('product-card', ProductCard);
+  }
+
+  
+</script>

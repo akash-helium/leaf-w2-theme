@@ -1,0 +1,257 @@
+{% schema %}
+{
+  "name": "Feature Blog Stories",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Stories"
+    },
+    {
+      "type": "url",
+      "id": "all_stories_link",
+      "label": "Link to 'Read all stories'",
+      "info": "Defaults to /blogs/news if not set."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story_card",
+      "name": "Story",
+      "settings": [
+        {
+          "type": "article",
+          "id": "article",
+          "label": "Article"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Stories",
+      "blocks": [
+        { "type": "story_card" },
+        { "type": "story_card" },
+        { "type": "story_card" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<section class="blog-stories-section">
+  <div class="blog-stories-header">
+    <h2 class="heading-size">{{ section.settings.title | escape }}</h2>
+    <button
+      class="blog-stories-btn blog-desktop-only btn-secondary"
+      onclick="window.location.href='{{ section.settings.all_stories_link | default: '/blogs/news' }}'"
+    >
+      Read all stories
+    </button>
+  </div>
+  <div class="blog-stories-grid">
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- assign article = block.settings.article -%}
+        <div class="blog-story-card-item" {{ block.shopify_attributes }}>
+          {%- if article != blank -%}
+            <a href="{{ article.url }}" class="blog-story-card">
+              {%- if article.image -%}
+                <img
+                  src="{{ article.image | image_url: width: 800}}"
+                  alt="{{ article.image.alt | escape }}"
+                  loading="lazy"
+                  width="800"
+                  height="{{ 800 | divided_by: article.image.aspect_ratio | round }}"
+                >
+              {%- else -%}
+                <img
+                  src="https://via.placeholder.com/800x800?text=No+Article+Image"
+                  alt="No image available for this story"
+                >
+              {%- endif -%}
+              <div class="blog-story-meta">
+                <p class="blog-story-date">
+                  {{ article.published_at | date: '%B %d, %Y' }}
+                  {%- if article.blog.title != blank -%}
+                    {{ article.blog.title }}
+                  {%- endif -%}
+                </p>
+                <h3 class="blog-story-title">{{ article.title }}</h3>
+              </div>
+            </a>
+          {%- else -%}
+            <div class="blog-story-card">
+              <img src="https://via.placeholder.com/800x800?text=Select+an+Article" alt="Placeholder for a story card">
+              <div class="blog-story-meta">
+                <p class="blog-story-date">Date / Category</p>
+                <h3 class="blog-story-title">Your Blog Post Title</h3>
+                <p class="blog-story-author">BY AUTHOR</p>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+  <div class="blog-mobile-only blog-stories-btn-container">
+    <button
+      class="blog-stories-btn btn-secondary "
+      onclick="window.location.href='{{ section.settings.all_stories_link | default: '/blogs/news' }}'"
+    >
+      Read all stories
+    </button>
+  </div>
+</section>
+
+<style>
+  .blog-stories-section {
+    padding: 60px 40px;
+    margin: 0 auto;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .blog-stories-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .blog-stories-header h2 {
+    font-size: 28px;
+    margin: 0;
+  }
+  .blog-stories-btn {
+
+    border: 1px solid rgba(0, 0, 0, 1);
+    width: 200px;
+    height: 50px;
+    border-radius: 50px;
+    cursor: pointer;
+  }
+  .blog-stories-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 24px;
+    padding-bottom: 20px;
+    margin-bottom: -20px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .blog-stories-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .blog-story-card-item {
+    flex-shrink: 0;
+    flex-basis: calc(33.333% - 16px);
+    min-width: 300px;
+  }
+  .blog-story-card {
+    overflow: hidden;
+    border-radius: 16px;
+    text-decoration: none;
+  
+    display: block;
+    height: 100%;
+  }
+  .blog-story-card img {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    object-fit: cover;
+    aspect-ratio: 1;
+    height:240px;
+  }
+  .blog-story-meta {
+    padding: 0 4px;
+  }
+  .blog-story-date {
+    font-size: 14px;
+    margin: 0 0 6px;
+  }
+  .blog-story-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .blog-story-author {
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+  }
+  .blog-desktop-only {
+    display: inline-block;
+  }
+  .blog-mobile-only {
+    display: none;
+  }
+  .blog-stories-btn-container {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 990px) {
+    .blog-story-card-item {
+      flex-basis: calc(50% - 12px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .blog-stories-section {
+      padding: 40px 20px;
+    }
+    .blog-stories-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .blog-stories-header h2 {
+      width: 100%;
+      text-align: center;
+    }
+    .blog-story-card-item {
+      flex-basis: 80%;
+      min-width: 280px;
+    }
+    .blog-desktop-only {
+      display: none;
+    }
+    .blog-mobile-only {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const blogStoriesTitleElement = document.getElementById('blog-stories-title');
+
+    if (!blogStoriesTitleElement) {
+      return;
+    }
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in-x-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    observer.observe(blogStoriesTitleElement);
+  });
+</script>

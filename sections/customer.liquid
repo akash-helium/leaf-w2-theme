@@ -1,0 +1,253 @@
+{% schema %}
+{
+  "name": "Customer Stats",
+  "settings": [
+    {
+      "type": "text",
+      "id": "stat_1_number",
+      "label": "Stat 1 Number",
+      "default": "100%"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 Label",
+      "default": "Made in India"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_number",
+      "label": "Stat 2 Number",
+      "default": "1Cr+"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 Label",
+      "default": "Website Visits"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_number",
+      "label": "Stat 3 Number",
+      "default": "15L+"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 Label",
+      "default": "Happy Customers"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Stats Section",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .customer-section {
+    background-color: #00000005;
+    border-radius: 25px;
+    margin-top: 20px;
+    margin-bottom:20px;
+    padding: 0px 40px;
+    max-width:100vw;
+    overflow:hidden;
+    box-sizing: border-box;
+  }
+
+  .customer-stats-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .customer-stat {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    background: var(--brand-bg-gradient);
+    border: 1px solid rgba(4, 179, 68, 0.2);
+    border-radius: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .customer-stat h2 {
+    font-weight: 600;
+    font-size: 50px;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .customer-stat p {
+    margin-top: 10px;
+    font-size: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+ 
+
+
+  @media (max-width: 768px) {
+    .customer-section {
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .customer-stats-wrapper {
+      display: block;
+    }
+
+    .customer-stats-wrapper.swiper {
+      overflow: hidden;
+    }
+
+    .customer-stats-wrapper .swiper-wrapper {
+      display: flex;
+    }
+
+    .customer-stats-wrapper .swiper-slide {
+      display: flex;
+      justify-content: center;
+
+      width: auto;
+    }
+
+    .customer-stat {
+      min-width: 250px;
+      padding: 20px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .customer-stat h2 {
+      font-size: 40px;
+    }
+
+    .customer-stat p {
+      font-size: 18px;
+    }
+  }
+  @media (max-width: 480px) {
+   .customer-section{
+display:none;
+     
+   }
+ }
+ @media (min-width: 480px) {
+   .custom-stats-list{
+     gap:20px;
+   }
+ }
+  
+
+  @media (max-width: 480px) {
+    .customer-section {
+      padding: 15px 10px;
+    }
+
+    .customer-stat {
+      min-width: 200px;
+      padding: 20px 15px;
+      border-radius: 15px;
+    }
+
+    .customer-stat h2 {
+      font-size: 32px;
+    }
+
+    .customer-stat p {
+      font-size: 16px;
+    }
+  }
+</style>
+
+<section class="customer-section">
+  <div class="customer-stats-wrapper" id="customer-stats-swiper">
+    <div class="swiper-wrapper custom-stats-list" >
+      <div class="customer-stat swiper-slide"
+              data-helium-animation="blurScaleIn"
+      data-helium-animation-trigger="view"
+      data-helium-animation-options="{}"
+>
+        <h2 class="text-gradient">{{ section.settings.stat_1_number }}</h2>
+        <p class="text-secondary">{{ section.settings.stat_1_label }}</p>
+      </div>
+      <div class="customer-stat swiper-slide"
+               data-helium-animation="blurScaleIn"
+      data-helium-animation-trigger="view"
+      data-helium-animation-options="{}">
+        <h2 class="text-gradient">{{ section.settings.stat_2_number }}</h2>
+        <p class="text-secondary">{{ section.settings.stat_2_label }}</p>
+      </div>
+      <div class="customer-stat swiper-slide"
+               data-helium-animation="blurScaleIn"
+      data-helium-animation-trigger="view"
+      data-helium-animation-options="{}">
+        <h2 class="text-gradient">{{ section.settings.stat_3_number }}</h2>
+        <p class="text-secondary">{{ section.settings.stat_3_label }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let swiper = null;
+    
+    function initSwiper() {
+      const swiperContainer = document.getElementById('customer-stats-swiper');
+
+      if (window.innerWidth <= 768 && !swiper) {
+       
+        
+        swiper = new Swiper('#customer-stats-swiper', {
+          // FIX: Change slidesPerView to 'auto' to work with centeredSlides
+          slidesPerView: 'auto',
+          spaceBetween: 100,
+          centeredSlides: true,
+          loop: true,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+          },
+          effect: 'slide',
+          speed: 300,
+        });
+      } else if (window.innerWidth > 768 && swiper) {
+        swiper.destroy(true, true);
+        swiper = null;
+        // This correctly removes the class when resizing back to desktop
+        swiperContainer.classList.remove('swiper');
+      }
+    }
+    
+    // Initialize on load
+    initSwiper();
+    
+    // Reinitialize on resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        initSwiper();
+      }, 250);
+    });
+  });
+</script>

@@ -1,0 +1,291 @@
+<section class="split-testimonial">
+<h2 id="bestsellers-title" class="text-primary heading-size fade-in-x-visible">{{section.settings.subtitle}}</h2>
+  <div class="split-wrapper">
+
+    <!-- LEFT IMAGE SLIDER -->
+   <div class="left-slider swiper">
+    <div class="product-card__gradient-bg"></div>
+  <div class="swiper-wrapper">
+    {% for block in section.blocks %}
+      <div class="swiper-slide">
+        <div class="mytestimg">
+            
+        <img src="{{ block.settings.image | img_url: '800x' }}">
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ARROWS -->
+  <div class="custom-arrow swiper-button-prev"></div>
+  <div class="custom-arrow swiper-button-next"></div>
+
+</div>
+
+    <!-- RIGHT CONTENT (STATIC) -->
+    <div class="right-content">
+
+      {% for block in section.blocks %}
+        <div class="content-item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}">
+
+          <p class="subtitle">{{ block.settings.subtitle }}</p>
+          <h2 class="title">{{ block.settings.title }}</h2>
+          <p class="desc">{{ block.settings.content }}</p>
+          <a href="{{ block.settings.btn_link }}" class="btn">
+            {{ block.settings.btn_text }}
+          </a>
+
+        </div>
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+<style>
+.split-wrapper {
+  display: flex;
+}
+section.split-testimonial {
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* LEFT IMAGE */
+.left-slider {
+  width: 50%;
+}
+
+.left-slider img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* RIGHT CONTENT */
+.right-content {
+  width: 50%;
+  position: relative;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* STACK ALL CONTENT */
+.content-item {
+  position: absolute;
+  opacity: 0;
+  transform: translateY(0px);
+  transition: 0.5s ease;
+}
+
+.content-item.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+section.split-testimonial p.subtitle {
+    color: #999;
+}
+section.split-testimonial h2.title {
+    margin-bottom: 10px;
+    font-size: 25px;
+    font-weight: 700;
+}
+section.split-testimonial p.desc {
+    color: #999;
+    font-size: 16px;
+}
+section.split-testimonial a.btn {
+    background: #fff;
+    color: #000;
+}
+
+.custom-arrow {
+    display: flex !important;
+    background: #fff;
+    padding: 20px;
+    background-color: rgb(20 20 20);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+}
+.custom-arrow:after {
+   color: #fff !important;
+font-size: 14px !important; 
+}
+
+.product-card__gradient-bg {
+    position: absolute;
+    top: -88px;
+    left: -60px;
+    width: 120%;
+    height: 140%;
+    background: radial-gradient(circle, var(--gradient-start, #04B344) 0%, var(--gradient-end, #1B66EF) 70%, transparent 100%);
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 1;
+    transform: scale(0.5);
+}
+.left-slider.swiper {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+  .mytestimg {
+    max-width: 50%;
+}
+.swiper-button-next, .swiper-button-prev {
+    top: 50% !important;
+}
+@media screen and (min-width: 801px) and (max-width: 999px){
+.product-card__gradient-bg {
+    position: absolute;
+    top: -65px;
+    left: -36px;
+    width: 120%;
+    height: 140%;
+    background: radial-gradient(circle, var(--gradient-start, #04B344) 0%, var(--gradient-end, #1B66EF) 70%, transparent 100%);
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 1;
+    transform: scale(0.5);
+}
+}
+@media screen and (min-width: 1001px) and (max-width: 1050px){
+.product-card__gradient-bg {
+    position: absolute;
+    top: -78px;
+    left: -48px;
+    width: 120%;
+    height: 140%;
+    background: radial-gradient(circle, var(--gradient-start, #04B344) 0%, var(--gradient-end, #1B66EF) 70%, transparent 100%);
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 1;
+    transform: scale(0.5);
+}
+}
+/* MOBILE */
+@media(max-width:768px){
+    .product-card__gradient-bg {
+    top: -65px;
+    left: -35px;
+    width: 120%;
+    height: 140%;
+}
+  .split-wrapper{
+    flex-direction: column;
+  }
+
+  .left-slider,
+  .right-content{
+    width: 100%;
+  }
+
+  .right-content {
+    position: relative;
+    height: 275px;
+    padding: 0;
+}
+  .custom-arrow.swiper-button-next {
+    left: auto;
+    right: 0;
+}
+.swiper-backface-hidden .swiper-slide {
+    height: fit-content;
+}
+}
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const contents = document.querySelectorAll('.content-item');
+
+  const slider = new Swiper(".left-slider", {
+  loop: true,
+  speed: 800,
+
+  on: {
+    slideChange: function () {
+      let realIndex = this.realIndex;
+
+      contents.forEach(el => el.classList.remove('active'));
+      if(contents[realIndex]){
+        contents[realIndex].classList.add('active');
+      }
+    }
+  }
+});
+
+// ARROW CLICK
+document.querySelector('.swiper-button-prev').addEventListener('click', () => {
+  slider.slidePrev();
+});
+
+document.querySelector('.swiper-button-next').addEventListener('click', () => {
+  slider.slideNext();
+});
+
+});
+</script>
+{% schema %}
+{
+  "name": "New Testimonial",
+  "settings": [
+    {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Heading"
+        }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "text",
+          "id": "btn_text",
+          "label": "Button Text"
+        },
+        {
+          "type": "url",
+          "id": "btn_link",
+          "label": "Button Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Testimonial"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1008 @@
+{% comment %} {%- comment -%}
+  This is the final, corrected header code. It includes:
+  1. A fix for the logo visibility.
+  2. A dynamic cart count badge that updates automatically.
+{%- endcomment -%}
+{%- comment -%}
+  This is the final, corrected header code. It includes:
+  1. A fix for the logo visibility logic to correctly prioritize the alternate logo.
+  2. A dynamic cart count badge that updates automatically.
+{%- endcomment -%}
+
+{%- if section.settings.navigation_style != 'sidebar' -%}
+  {%- assign use_sidebar_menu = false -%}
+{%- else -%}
+  {%- assign use_sidebar_menu = true -%}
+{%- endif -%}
+
+{%- capture section_settings -%}
+{
+  "navigationStyle": {{ section.settings.navigation_style | json }},
+  "hasTransparentHeader": false,
+  "isSticky": {% if section.settings.use_sticky_header %}true{% else %}false{% endif %}
+}
+{%- endcapture -%}
+
+<header id="section-{{ section.id }}"
+        class="Header Header--{{ section.settings.navigation_style }}"
+        data-section-id="{{ section.id }}"
+        data-section-type="header"
+        data-section-settings='{{ section_settings }}'
+        role="banner">
+  <div class="Header__Wrapper">
+    <div class="Header__FlexItem Header__FlexItem--fill">
+  <div class="Header__DrawerToggles">
+  <button
+    type="button"
+    class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable {% unless use_sidebar_menu %}hidden-desk{% endunless %} js-open-drawer"
+    data-action="open-drawer"
+    data-drawer-id="sidebar-menu"
+    aria-controls="sidebar-menu"
+    aria-expanded="false"
+    aria-hidden="false"
+    aria-label="{{ 'header.navigation.open_sidebar' | t }}"
+  >
+    <span class="hidden-tablet-and-up">{%- include 'icon' with 'nav' -%}</span>
+    <span class="hidden-phone">{%- include 'icon' with 'nav-desktop' -%}</span>
+  </button>
+
+  <button
+    type="button"
+    class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable {% unless use_sidebar_menu %}hidden-desk{% endunless %} js-close-drawer"
+    data-action="close-drawer"
+    data-drawer-id="sidebar-menu"
+    aria-controls="sidebar-menu"
+    aria-expanded="true"
+    aria-hidden="true"
+    aria-label="{{ 'header.navigation.close_sidebar' | t }}"
+  >
+ <svg class="icon icon-close" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+    <line x1="16" y1="4" x2="4" y2="16"/>
+    <line x1="4" y1="4" x2="16" y2="16"/>
+  </svg>
+    <span class="hidden-phone">{%- include 'icon' with 'nav-desktop' -%}</span>
+  </button>
+</div>
+
+      {%- unless use_sidebar_menu -%}
+        <nav class="Header__MainNav hidden-pocket hidden-lap" aria-label="{{ 'header.navigation.title' | t }}">
+          <ul class="HorizontalList HorizontalList--spacingExtraLoose">
+            {%- for link in section.settings.main_menu.links -%}
+              {%- assign has_mega_menu = false -%}
+              {%- if link.type == 'collection_link' and link.object.products.size > 0 -%}
+                {%- assign has_mega_menu = true -%}
+              {%- elsif link.links != blank -%}
+                {%- assign has_mega_menu = true -%}
+              {%- endif -%}
+
+              <li class="HorizontalList__Item {% if has_mega_menu %}has-dropdown{% endif %}" {% if has_mega_menu %}aria-haspopup="true"{% endif %}>
+                <a href="{{ link.url }}" class="Heading u-h6" aria-expanded="false">
+                  {{- link.title | escape -}}
+                  <span class="Header__LinkSpacer">{{ link.title | escape }}</span>
+                </a>
+
+                {%- if has_mega_menu -%}
+                  <div class="MegaMenu" aria-hidden="true">
+                    <div class="MegaMenu__Content">
+                      {%- if link.type == 'collection_link' and link.object.products.size > 0 -%}
+                        <div class="MegaMenu__Column" style="flex-grow: 1;">
+                          <div class="MegaMenu__ProductGrid">
+                            {%- for product in link.object.products -%}
+                              {%- assign animation_delay = forloop.index0 | times: 0.1 | plus: 0.2 -%}
+                              {%- capture helium_options -%}{ "viewSettings":{"once":true}, "transitionSettings":{"duration":0.8, "delay":{{ animation_delay }} } }{%- endcapture -%}
+                              <a href="{{ product.url }}" class="MegaMenu__ProductItem" data-helium-animation="blurScaleIn" data-helium-animation-trigger="view" data-helium-animation-options="{{ helium_options | escape }}">
+                                <div class="MegaMenu__ProductItem-image-wrapper product-image">
+                                  {% if product.metafields.custom.transparent_hero_image %}
+  
+  {% comment %} If it exists, use the metafield image. {% endcomment %}
+  <img
+    class="normal-image"
+    src="{{ product.metafields.custom.transparent_hero_image | img_url: '1104x1104' }}"
+    alt="{{ product.title }}"
+    loading="lazy"
+    width="100%"
+    height="auto"
+  >
+    
+{% else %}
+  
+  {% comment %}
+    Otherwise, fall back to the product's featured image.
+    We also check if a featured image exists to avoid errors.
+  {% endcomment %}
+  {% if product.featured_image %}
+    <img
+      class="normal-image"
+      src="{{ product.featured_image | img_url: '1104x1104' }}"
+      alt="{{ product.featured_image.alt | escape | default: product.title }}"
+      loading="lazy"
+      width="100%"
+      height="auto"
+    >
+  {% endif %}
+    
+{% endif %}
+
+    
+                                </div>
+                                <span class="MegaMenu__ProductTitle">{{ product.title }}</span>
+                              </a>
+                            {%- endfor -%}
+                          </div>
+                        </div>
+                      {%- elsif link.links != blank -%}
+                        {%- for sub_link in link.links -%}
+                          <div class="MegaMenu__Column">
+                            <h3 class="MegaMenu__Title">{{ sub_link.title }}</h3>
+                            {%- if sub_link.type == 'collection_link' and sub_link.object.products.size > 0 -%}
+                              <div class="MegaMenu__ProductGrid">
+                                {%- for product in sub_link.object.products -%}
+                                  {%- assign animation_delay = forloop.index0 | times: 0.1 | plus: 0.2 -%}
+                                  {%- capture helium_options -%}{ "viewSettings":{"once":true}, "transitionSettings":{"duration":0.8, "delay":{{ animation_delay }} } }{%- endcapture -%}
+                                  <a href="{{ product.url }}" class="MegaMenu__ProductItem" data-helium-animation="blurScaleIn" data-helium-animation-trigger="view" data-helium-animation-options="{{ helium_options | escape }}">
+                                   <div class="MegaMenu__ProductItem-image-wrapper">
+
+</div>
+
+                                    <span class="MegaMenu__ProductTitle">{{ product.title }}</span>
+                                  </a>
+                                {%- endfor -%}
+                              </div>
+                            {%- elsif sub_link.type == 'product_link' -%}
+                              <a href="{{ sub_link.url }}" class="MegaMenu__ProductItem MegaMenu__ProductItem--featured">
+                                <div class="MegaMenu__ProductItem-image-wrapper">
+                                  <img src="{{ sub_link.object.featured_image | image_url: width: 600 }}" alt="{{ sub_link.object.featured_image.alt | escape }}" loading="lazy">
+                                </div>
+                                <span class="MegaMenu__ProductTitle">{{ sub_link.object.title }}</span>
+                              </a>
+                            {%- elsif sub_link.links != blank -%}
+                              <ul class="MegaMenu__LinkList">
+                                {%- for child_link in sub_link.links -%}
+                                  <li><a href="{{ child_link.url }}">{{ child_link.title }}</a></li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
+                          </div>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endunless -%}
+    </div>
+
+    {%- capture header_logo -%}
+      <a href="/" class="Header__LogoLink">
+        {%- if section.settings.alternate_logo != blank -%}
+          <img class="Header__LogoImage"
+               src="{{ section.settings.alternate_logo | image_url }}"
+               srcset="{{ section.settings.alternate_logo | image_url}} 1x, {{ section.settings.alternate_logo | image_url}} 2x"
+               width="{{ section.settings.logo_max_width }}"
+               alt="{{ section.settings.alternate_logo.alt | default: shop.name | escape }}">
+        {%- elsif section.settings.logo != blank -%}
+          <img class="Header__LogoImage"
+               src="{{ section.settings.logo | image_url }}"
+               srcset="{{ section.settings.logo | image_url }} 1x, {{ section.settings.logo | image_url: scale: 2 }} 2x"
+               width="{{ section.settings.logo_max_width }}"
+               alt="{{ section.settings.logo.alt | default: shop.name | escape }}">
+        {%- else -%}
+          <span class="Heading u-h4">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    {%- endcapture -%}
+
+    <div class="Header__FlexItem">
+      {%- if template == 'index' -%}<h1 class="Header__Logo">{{ header_logo }}</h1>{%- else -%}<div class="Header__Logo">{{ header_logo }}</div>{%- endif -%}
+    </div>
+    
+
+    <div class="Header__FlexItem Header__FlexItem--fill">
+      {%- unless use_sidebar_menu -%}
+        <nav class="Header__SecondaryNav">
+          <ul class="HorizontalList HorizontalList--spacingLoose hidden-pocket hidden-lap">
+            <li class="HorizontalList__Item">
+              <a href="/account" class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable" aria-label="{{ 'header.navigation.account' | t }}">
+                <svg class="icon icon-account" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M12 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4zm0-2c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>
+              </a>
+            </li>
+            <li class="HorizontalList__Item">
+              <a href="/search" class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable" data-action="open-modal" aria-controls="Search" aria-label="{{ 'header.navigation.search' | t }}">
+                <svg class="icon icon-search" viewBox="0 0 20 20" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M17.545 15.467l-3.39-3.39a6.773 6.773 0 001.398-4.1A6.8 6.8 0 108.753 14.8a6.773 6.773 0 004.1-1.398l3.39 3.39a1 1 0 001.414-1.414zM3.6 8.077a5.2 5.2 0 115.2 5.2 5.207 5.207 0 01-5.2-5.2z"/></svg>
+              </a>
+            </li>
+            {% comment %} <li class="HorizontalList__Item">
+              <a href="/cart" class="Header__Icon Icon-Wrapper Header__CartIcon Icon-Wrapper--clickable" {% unless template == 'cart' or settings.cart_type == 'page' %}data-action="open-drawer" data-drawer-id="sidebar-cart"{% endunless %} aria-label="{{ 'header.navigation.open_cart' | t }}">
+                <svg class="icon icon-cart" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14h9.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.002 1.002 0 0020.92 5H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44A1.992 1.992 0 007 18h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+<span class="Header__CartCount">
+        {{ cart.item_count }}
+      </span>
+              </a>
+            </li> {% endcomment %}
+          </ul>
+        </nav>
+          <a href="/search"
+            class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable hidden-desk"
+            data-action="open-modal"
+            aria-controls="Search"
+            aria-label="{{ 'header.navigation.search' | t }}"
+            >
+            <svg class="icon icon-search" viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+              <path d="M17.545 15.467l-3.39-3.39a6.773 6.773 0 001.398-4.1A6.8 6.8 0 108.753 14.8a6.773 6.773 0 004.1-1.398l3.39 3.39a1 1 0 001.414-1.414zM3.6 8.077a5.2 5.2 0 115.2 5.2 5.207 5.207 0 01-5.2-5.2z"/>
+            </svg>
+          </a>
+            <a href="/cart" class="Header__Icon Icon-Wrapper Header__CartIcon Icon-Wrapper--clickable" {% unless template == 'cart' or settings.cart_type == 'page' %}data-action="open-drawer" data-drawer-id="sidebar-cart"{% endunless %} aria-label="{{ 'header.navigation.open_cart' | t }}" style="margin-left:20px">
+      <svg class="icon icon-cart" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14h9.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.002 1.002 0 0020.92 5H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44A1.992 1.992 0 007 18h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+      <span class="Header__CartCount">
+        {{ cart.item_count }}
+      </span>
+    </a>
+
+
+      {%- endunless -%}
+    </div>
+
+
+
+
+
+
+
+{% if template contains "product" %}
+  {% include "sticky-addtocart" %}
+{% endif %}
+
+  </div>
+</header>
+
+
+<style>
+  :root { --header-padding: 5px 60px; }
+  .Header__Icon, .Icon-Wrapper { display: flex; align-items: center; justify-content: center; }
+  .Icon-Wrapper .icon { fill: currentColor; }
+  {%- if section.settings.use_sticky_header -%}:root { --use-sticky-header: 1; } .shopify-section--header { position: -webkit-sticky; position: sticky; } {%- else -%} :root { --use-sticky-header: 0; } {%- endif -%}
+  @media screen and (max-width: 640px) { .Header__LogoImage { max-width: {{ section.settings.mobile_logo_max_width }}px; } }
+
+  .shopify-section--header { top: 0; left: 0; width: 100%; z-index: 100; }
+  .Header { font-family: "Poppins", sans-serif !important; transition: background-color 0.3s ease; background-color: #121212; border: none; box-shadow: none; }
+  .Header, .Header .Heading, .Header .Link { color: {{ section.settings.text_color }}; }
+  .Header a:hover { opacity: 0.7; }
+  .Header__Wrapper { display: flex; align-items: center; justify-content: space-between; padding: var(--header-padding); }
+  .Header__FlexItem { display: flex; align-items: center; flex: 1 1 0; }
+  .Header__FlexItem:nth-child(1) { justify-content: flex-start; }
+  .Header__FlexItem:nth-child(2) { flex: 0 1 auto; }
+  .Header__FlexItem:nth-child(3) { justify-content: flex-end; }
+  .Header__Logo .Heading { font-size: 28px; font-weight: 600; letter-spacing: 2px; color: inherit !important; }
+  .Header__MainNav .HorizontalList { gap: 40px; }
+  .Header__SecondaryNav .HorizontalList { gap: 20px; }
+  .Header__MainNav .HorizontalList__Item > a { font-size: 14px; font-weight: 400; padding: 20px 0; }
+
+  .MegaMenu {
+    position: absolute; top: 100%; left: 0; width: 100vw; background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    padding: 3rem 0; opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none;
+    border: none; max-height: 75vh; overflow-y: auto;
+  }
+  .MegaMenu.is-visible { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+  .MegaMenu__Content { display: flex; gap: 2.5rem; max-width: 1400px; margin: 0 auto; padding: 0 60px; box-sizing: border-box; }
+  .MegaMenu__Column { flex: 1; }
+  .MegaMenu__Title { font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .MegaMenu__ProductGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem 1.5rem; }
+  .MegaMenu__ProductItem { text-decoration: none; display: flex; flex-direction: column; }
+  .MegaMenu__ProductItem-image-wrapper { border-radius: 8px; overflow: hidden; aspect-ratio: 1/1; margin-bottom: 0.75rem; }
+  .MegaMenu__ProductItem-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  .MegaMenu__ProductItem:hover img { transform: scale(1.05); }
+  .MegaMenu__ProductTitle { color: white; text-align: center; font-size: 0.9rem; line-height: 1.4; }
+  .MegaMenu__LinkList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+  .MegaMenu__LinkList a { color: white; text-decoration: none; }
+  .MegaMenu__LinkList a:hover { text-decoration: underline; }
+  
+  /* --- CART COUNT BADGE STYLES --- */
+  .Header__CartIcon { position: relative; }
+  .Header__CartCountBadge {
+    display: flex; align-items: center; justify-content: center; position: absolute;
+    top: -2px; right: -5px; background-color: {{ section.settings.text_color }};
+    color: #121212; border-radius: 50%; font-size: 10px; font-weight: 700;
+    line-height: 1; min-width: 18px; height: 18px; padding: 0 3px;
+    transition: transform 0.2s ease, opacity 0.2s ease; z-index: 1; pointer-events: none;
+  }
+  .Header__CartCountBadge.is-hidden { transform: scale(0); opacity: 0; }
+  .Header__CartCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  color: #ffffff;
+  background:red;
+
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+}
+.js-open-drawer { display: inline-flex; }
+.js-close-drawer { display: none; }
+
+
+/* Container dimensions can match your icon size */
+.Header__DrawerToggles {
+  position: relative;
+  width: var(--header-icon-size, 40px);
+  height: var(--header-icon-size, 40px);
+}
+
+/* Stack the buttons and center their contents */
+.Header__DrawerToggles .Header__Icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* Hidden state: visually hidden, no clicks, slightly scaled down */
+.Header__DrawerToggles .Header__Icon[aria-hidden="true"] {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+/* Visible state */
+.Header__DrawerToggles .Header__Icon[aria-hidden="false"] {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Respect user pref for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .Header__DrawerToggles .Header__Icon {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* When drawer is open, flip visibility */
+:root:has(#sidebar-menu[aria-hidden="false"]) .js-open-drawer { display: none; }
+:root:has(#sidebar-menu[aria-hidden="false"]) .js-close-drawer { display: inline-flex; }
+  /* --- End of Cart Badge Styles --- */
+
+  @media (max-width: 1200px) { :root { --header-padding: 5px 30px; } .MegaMenu__Content { padding: 0 30px; } }
+  @media (max-width: 1024px) { .MegaMenu__Content { flex-direction: column; } }
+  @media (max-width: 768px) { .Header__Wrapper { padding: 10px 20px; } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // --- Mega Menu Functionality ---
+  const navItems = document.querySelectorAll('.Header__MainNav .HorizontalList__Item.has-dropdown');
+  navItems.forEach(item => {
+    const link = item.querySelector('a');
+    const menu = item.querySelector('.MegaMenu');
+    let hideTimeout;
+
+    if (!link || !menu) return;
+
+    const showMenu = () => {
+      clearTimeout(hideTimeout);
+      document.querySelectorAll('.MegaMenu.is-visible').forEach(m => {
+        if (m !== menu) m.classList.remove('is-visible');
+      });
+      link.setAttribute('aria-expanded', 'true');
+      menu.classList.add('is-visible');
+    };
+
+    const hideMenu = () => {
+      hideTimeout = setTimeout(() => {
+        link.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('is-visible');
+      }, 200);
+    };
+
+    item.addEventListener('mouseenter', showMenu);
+    item.addEventListener('mouseleave', hideMenu);
+    menu.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    menu.addEventListener('mouseleave', hideMenu);
+  });
+
+  // --- Dynamic Cart Count Functionality ---
+  function updateCartCountUI(count) {
+    const countElements = document.querySelectorAll('.Header__CartCount');
+    countElements.forEach(el => {
+      el.textContent = count;
+      if (count > 0) {
+        el.classList.remove('is-hidden');
+      } else {
+        el.classList.add('is-hidden');
+      }
+    });
+  }
+
+  document.body.addEventListener('cart:updated', function(evt) {
+    if (evt.detail && typeof evt.detail.cart.item_count !== 'undefined') {
+      updateCartCountUI(evt.detail.cart.item_count);
+    }
+  });
+
+  // --- Sidebar Drawer Toggle Buttons (with animation) ---
+  const openBtn = document.querySelector('.Header__Icon[data-action="open-drawer"][data-drawer-id="sidebar-menu"]');
+  const closeBtn = document.querySelector('.Header__Icon[data-action="close-drawer"][data-drawer-id="sidebar-menu"]');
+  const drawer = document.getElementById('sidebar-menu');
+
+  if (openBtn && closeBtn) {
+    function drawerIsOpen() {
+      if (!drawer) return false;
+      if (drawer.hasAttribute('open')) return true;
+      const ariaHidden = drawer.getAttribute('aria-hidden');
+      if (ariaHidden === 'false') return true;
+      if (drawer.classList.contains('is-open') || drawer.classList.contains('Drawer--open')) return true;
+      return false;
+    }
+
+    function syncButtons() {
+      const isOpen = drawerIsOpen();
+      // Animate via aria-hidden instead of hidden
+      openBtn.setAttribute('aria-hidden', String(isOpen));      // hide openBtn when drawer is open
+      closeBtn.setAttribute('aria-hidden', String(!isOpen));    // hide closeBtn when drawer is closed
+      // Keep ARIA-expanded for screen readers
+      openBtn.setAttribute('aria-expanded', String(isOpen));
+      closeBtn.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    openBtn.addEventListener('click', () => setTimeout(syncButtons, 0));
+    closeBtn.addEventListener('click', () => setTimeout(syncButtons, 0));
+
+    if (drawer) {
+      const mo = new MutationObserver(syncButtons);
+      mo.observe(drawer, { attributes: true, attributeFilter: ['aria-hidden', 'class', 'open'] });
+    }
+
+    document.addEventListener('drawer:open', (e) => {
+      const id = e?.detail?.id;
+      if (!id || id === 'sidebar-menu') syncButtons();
+    });
+    document.addEventListener('drawer:close', (e) => {
+      const id = e?.detail?.id;
+      if (!id || id === 'sidebar-menu') syncButtons();
+    });
+
+    // Initial state
+    syncButtons();
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "shopify-section--header",
+  "settings": [
+    { "type": "checkbox", "id": "use_sticky_header", "label": "Use sticky header", "default": true },
+    { "type": "image_picker", "id": "logo", "label": "Logo image (fallback)" },
+    { "type": "range", "id": "logo_max_width", "min": 50, "max": 350, "step": 5, "unit": "px", "label": "Logo image width", "default": 140 },
+    { "type": "range", "id": "mobile_logo_max_width", "min": 50, "max": 200, "step": 5, "unit": "px", "label": "Mobile logo image width", "default": 90 },
+    { "type": "header", "content": "Navigation" },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "Build dropdowns by nesting links in the Navigation admin. A second-level link to a collection will create a product grid."
+    },
+    { "type": "select", "id": "navigation_style", "label": "Navigation style", "options": [{ "value": "sidebar", "label": "Sidebar" }, { "value": "inline", "label": "Inline" }, { "value": "center", "label": "Center" }], "default": "inline" },
+    { "type": "header", "content": "Header Colors" },
+    { "type": "color", "id": "text_color", "label": "Text/icon color", "default": "#ffffff" },
+    { "type": "image_picker", "id": "alternate_logo", "label": "Logo for dark header", "info": "Use a light-colored version of your logo here. This will be prioritized over the fallback logo." }
+  ],
+  "presets": [ { "name": "Header" } ]
+}
+{% endschema %} {% endcomment %}
+
+
+{%- comment -%}
+  This is the final, corrected header code. It includes:
+  1. A fix for the logo visibility.
+  2. A dynamic cart count badge that updates automatically.
+  3. A fix for the hamburger menu hiding when search/other modals open on mobile.
+{%- endcomment -%}
+
+{%- if section.settings.navigation_style != 'sidebar' -%}
+  {%- assign use_sidebar_menu = false -%}
+{%- else -%}
+  {%- assign use_sidebar_menu = true -%}
+{%- endif -%}
+
+{%- capture section_settings -%}
+{
+  "navigationStyle": {{ section.settings.navigation_style | json }},
+  "hasTransparentHeader": false,
+  "isSticky": {% if section.settings.use_sticky_header %}true{% else %}false{% endif %}
+}
+{%- endcapture -%}
+
+<header id="section-{{ section.id }}"
+        class="Header Header--{{ section.settings.navigation_style }}"
+        data-section-id="{{ section.id }}"
+        data-section-type="header"
+        data-section-settings='{{ section_settings }}'
+        role="banner">
+  <div class="Header__Wrapper">
+    <div class="Header__FlexItem Header__FlexItem--fill">
+  <div class="Header__DrawerToggles">
+  <button
+    type="button"
+    class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable {% unless use_sidebar_menu %}hidden-desk{% endunless %} js-open-drawer"
+    data-action="open-drawer"
+    data-drawer-id="sidebar-menu"
+    aria-controls="sidebar-menu"
+    aria-expanded="false"
+    aria-hidden="false"
+    aria-label="{{ 'header.navigation.open_sidebar' | t }}"
+  >
+    <span class="hidden-tablet-and-up">{%- include 'icon' with 'nav' -%}</span>
+    <span class="hidden-phone">{%- include 'icon' with 'nav-desktop' -%}</span>
+  </button>
+
+  <button
+    type="button"
+    class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable {% unless use_sidebar_menu %}hidden-desk{% endunless %} js-close-drawer"
+    data-action="close-drawer"
+    data-drawer-id="sidebar-menu"
+    aria-controls="sidebar-menu"
+    aria-expanded="true"
+    aria-hidden="true"
+    aria-label="{{ 'header.navigation.close_sidebar' | t }}"
+  >
+ <svg class="icon icon-close" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+    <line x1="16" y1="4" x2="4" y2="16"/>
+    <line x1="4" y1="4" x2="16" y2="16"/>
+  </svg>
+    <span class="hidden-phone">{%- include 'icon' with 'nav-desktop' -%}</span>
+  </button>
+</div>
+
+      {%- unless use_sidebar_menu -%}
+        <nav class="Header__MainNav hidden-pocket hidden-lap" aria-label="{{ 'header.navigation.title' | t }}">
+          <ul class="HorizontalList HorizontalList--spacingExtraLoose">
+            {%- for link in section.settings.main_menu.links -%}
+              {%- assign has_mega_menu = false -%}
+              {%- if link.type == 'collection_link' and link.object.products.size > 0 -%}
+                {%- assign has_mega_menu = true -%}
+              {%- elsif link.links != blank -%}
+                {%- assign has_mega_menu = true -%}
+              {%- endif -%}
+
+              <li class="HorizontalList__Item {% if has_mega_menu %}has-dropdown{% endif %}" {% if has_mega_menu %}aria-haspopup="true"{% endif %}>
+                <a href="{{ link.url }}" class="Heading u-h6" aria-expanded="false">
+                  {{- link.title | escape -}}
+                  <span class="Header__LinkSpacer">{{ link.title | escape }}</span>
+                </a>
+
+                {%- if has_mega_menu -%}
+                  <div class="MegaMenu" aria-hidden="true">
+                    <div class="MegaMenu__Content">
+                      {%- if link.type == 'collection_link' and link.object.products.size > 0 -%}
+                        <div class="MegaMenu__Column" style="flex-grow: 1;">
+                          <div class="MegaMenu__ProductGrid">
+                            {%- for product in link.object.products -%}
+                              {%- assign animation_delay = forloop.index0 | times: 0.1 | plus: 0.2 -%}
+                              {%- capture helium_options -%}{ "viewSettings":{"once":true}, "transitionSettings":{"duration":0.8, "delay":{{ animation_delay }} } }{%- endcapture -%}
+                              <a href="{{ product.url }}" class="MegaMenu__ProductItem" data-helium-animation="blurScaleIn" data-helium-animation-trigger="view" data-helium-animation-options="{{ helium_options | escape }}">
+                                <div class="MegaMenu__ProductItem-image-wrapper product-image">
+                                  {% if product.metafields.custom.transparent_hero_image %}
+  
+  {% comment %} If it exists, use the metafield image. {% endcomment %}
+  <img
+    class="normal-image"
+    src="{{ product.metafields.custom.transparent_hero_image | img_url: '1104x1104' }}"
+    alt="{{ product.title }}"
+    loading="lazy"
+    width="100%"
+    height="auto"
+  >
+    
+{% else %}
+  
+  {% comment %}
+    Otherwise, fall back to the product's featured image.
+    We also check if a featured image exists to avoid errors.
+  {% endcomment %}
+  {% if product.featured_image %}
+    <img
+      class="normal-image"
+      src="{{ product.featured_image | img_url: '1104x1104' }}"
+      alt="{{ product.featured_image.alt | escape | default: product.title }}"
+      loading="lazy"
+      width="100%"
+      height="auto"
+    >
+  {% endif %}
+    
+{% endif %}
+
+    
+                                </div>
+                                <span class="MegaMenu__ProductTitle">{{ product.title }}</span>
+                              </a>
+                            {%- endfor -%}
+                          </div>
+                        </div>
+                      {%- elsif link.links != blank -%}
+                        {%- for sub_link in link.links -%}
+                          <div class="MegaMenu__Column">
+                            <h3 class="MegaMenu__Title">{{ sub_link.title }}</h3>
+                            {%- if sub_link.type == 'collection_link' and sub_link.object.products.size > 0 -%}
+                              <div class="MegaMenu__ProductGrid">
+                                {%- for product in sub_link.object.products -%}
+                                  {%- assign animation_delay = forloop.index0 | times: 0.1 | plus: 0.2 -%}
+                                  {%- capture helium_options -%}{ "viewSettings":{"once":true}, "transitionSettings":{"duration":0.8, "delay":{{ animation_delay }} } }{%- endcapture -%}
+                                  <a href="{{ product.url }}" class="MegaMenu__ProductItem" data-helium-animation="blurScaleIn" data-helium-animation-trigger="view" data-helium-animation-options="{{ helium_options | escape }}">
+                                   <div class="MegaMenu__ProductItem-image-wrapper">
+
+</div>
+
+                                    <span class="MegaMenu__ProductTitle">{{ product.title }}</span>
+                                  </a>
+                                {%- endfor -%}
+                              </div>
+                            {%- elsif sub_link.type == 'product_link' -%}
+                              <a href="{{ sub_link.url }}" class="MegaMenu__ProductItem MegaMenu__ProductItem--featured">
+                                <div class="MegaMenu__ProductItem-image-wrapper">
+                                  <img src="{{ sub_link.object.featured_image | image_url: width: 600 }}" alt="{{ sub_link.object.featured_image.alt | escape }}" loading="lazy">
+                                </div>
+                                <span class="MegaMenu__ProductTitle">{{ sub_link.object.title }}</span>
+                              </a>
+                            {%- elsif sub_link.links != blank -%}
+                              <ul class="MegaMenu__LinkList">
+                                {%- for child_link in sub_link.links -%}
+                                  <li><a href="{{ child_link.url }}">{{ child_link.title }}</a></li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
+                          </div>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endunless -%}
+    </div>
+
+    {%- capture header_logo -%}
+      <a href="/" class="Header__LogoLink">
+        {%- if section.settings.alternate_logo != blank -%}
+          <img class="Header__LogoImage"
+               src="{{ section.settings.alternate_logo | image_url }}"
+               srcset="{{ section.settings.alternate_logo | image_url}} 1x, {{ section.settings.alternate_logo | image_url}} 2x"
+               width="{{ section.settings.logo_max_width }}"
+               alt="{{ section.settings.alternate_logo.alt | default: shop.name | escape }}">
+        {%- elsif section.settings.logo != blank -%}
+          <img class="Header__LogoImage"
+               src="{{ section.settings.logo | image_url }}"
+               srcset="{{ section.settings.logo | image_url }} 1x, {{ section.settings.logo | image_url: scale: 2 }} 2x"
+               width="{{ section.settings.logo_max_width }}"
+               alt="{{ section.settings.logo.alt | default: shop.name | escape }}">
+        {%- else -%}
+          <span class="Heading u-h4">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    {%- endcapture -%}
+
+    <div class="Header__FlexItem">
+      {%- if template == 'index' -%}<h1 class="Header__Logo">{{ header_logo }}</h1>{%- else -%}<div class="Header__Logo">{{ header_logo }}</div>{%- endif -%}
+    </div>
+    
+
+    <div class="Header__FlexItem Header__FlexItem--fill">
+      {%- unless use_sidebar_menu -%}
+        <nav class="Header__SecondaryNav">
+          <ul class="HorizontalList HorizontalList--spacingLoose hidden-pocket hidden-lap">
+            <li class="HorizontalList__Item">
+              <a href="/account" class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable" aria-label="{{ 'header.navigation.account' | t }}">
+                <svg class="icon icon-account" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M12 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4zm0-2c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>
+              </a>
+            </li>
+            <li class="HorizontalList__Item">
+              <a href="/search" class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable" data-action="open-modal" aria-controls="Search" aria-label="{{ 'header.navigation.search' | t }}">
+                <svg class="icon icon-search" viewBox="0 0 20 20" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M17.545 15.467l-3.39-3.39a6.773 6.773 0 001.398-4.1A6.8 6.8 0 108.753 14.8a6.773 6.773 0 004.1-1.398l3.39 3.39a1 1 0 001.414-1.414zM3.6 8.077a5.2 5.2 0 115.2 5.2 5.207 5.207 0 01-5.2-5.2z"/></svg>
+              </a>
+            </li>
+            {% comment %} <li class="HorizontalList__Item">
+              <a href="/cart" class="Header__Icon Icon-Wrapper Header__CartIcon Icon-Wrapper--clickable" {% unless template == 'cart' or settings.cart_type == 'page' %}data-action="open-drawer" data-drawer-id="sidebar-cart"{% endunless %} aria-label="{{ 'header.navigation.open_cart' | t }}">
+                <svg class="icon icon-cart" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14h9.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.002 1.002 0 0020.92 5H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44A1.992 1.992 0 007 18h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+<span class="Header__CartCount">
+        {{ cart.item_count }}
+      </span>
+              </a>
+            </li> {% endcomment %}
+          </ul>
+        </nav>
+          <a href="/search"
+            class="Header__Icon Icon-Wrapper Icon-Wrapper--clickable hidden-desk"
+            data-action="open-modal"
+            aria-controls="Search"
+            aria-label="{{ 'header.navigation.search' | t }}"
+            >
+            <svg class="icon icon-search" viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+              <path d="M17.545 15.467l-3.39-3.39a6.773 6.773 0 001.398-4.1A6.8 6.8 0 108.753 14.8a6.773 6.773 0 004.1-1.398l3.39 3.39a1 1 0 001.414-1.414zM3.6 8.077a5.2 5.2 0 115.2 5.2 5.207 5.207 0 01-5.2-5.2z"/>
+            </svg>
+          </a>
+            <a href="/cart" class="Header__Icon Icon-Wrapper Header__CartIcon Icon-Wrapper--clickable" {% unless template == 'cart' or settings.cart_type == 'page' %}data-action="open-drawer" data-drawer-id="sidebar-cart"{% endunless %} aria-label="{{ 'header.navigation.open_cart' | t }}" style="margin-left:20px">
+      <svg class="icon icon-cart" viewBox="0 0 24 24" focusable="false" aria-hidden="true" width="20" height="20" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14h9.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.002 1.002 0 0020.92 5H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44A1.992 1.992 0 007 18h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+      <span class="Header__CartCount">
+        {{ cart.item_count }}
+      </span>
+    </a>
+
+
+      {%- endunless -%}
+    </div>
+
+
+{% if template contains "product" %}
+  {% include "sticky-addtocart" %}
+{% endif %}
+
+  </div>
+</header>
+
+
+<style>
+  :root { --header-padding: 5px 60px; }
+  .Header__Icon, .Icon-Wrapper { display: flex; align-items: center; justify-content: center; }
+  .Icon-Wrapper .icon { fill: currentColor; }
+  {%- if section.settings.use_sticky_header -%}:root { --use-sticky-header: 1; } .shopify-section--header { position: -webkit-sticky; position: sticky; } {%- else -%} :root { --use-sticky-header: 0; } {%- endif -%}
+  @media screen and (max-width: 640px) { .Header__LogoImage { max-width: {{ section.settings.mobile_logo_max_width }}px; } }
+
+  .shopify-section--header { top: 0; left: 0; width: 100%; z-index:100; }
+  .Header { font-family: "Poppins", sans-serif !important; transition: background-color 0.3s ease; background-color: #121212; border: none; box-shadow: none; }
+  .Header, .Header .Heading, .Header .Link { color: {{ section.settings.text_color }}; }
+  .Header a:hover { opacity: 0.7; }
+  .Header__Wrapper { display: flex; align-items: center; justify-content: space-between; padding: var(--header-padding); }
+  .Header__FlexItem { display: flex; align-items: center; flex: 1 1 0; }
+  .Header__FlexItem:nth-child(1) { justify-content: flex-start; }
+  .Header__FlexItem:nth-child(2) { flex: 0 1 auto; }
+  .Header__FlexItem:nth-child(3) { justify-content: flex-end; }
+  .Header__Logo .Heading { font-size: 28px; font-weight: 600; letter-spacing: 2px; color: inherit !important; }
+  .Header__MainNav .HorizontalList { gap: 40px; }
+  .Header__SecondaryNav .HorizontalList { gap: 20px; }
+  .Header__MainNav .HorizontalList__Item > a { font-size: 14px; font-weight: 400; padding: 20px 0; }
+
+  .MegaMenu {
+    position: absolute; top: 100%; left: 0; width: 100vw; background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    padding: 3rem 0; opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none;
+    border: none; max-height: 75vh; overflow-y: auto;
+  }
+  .MegaMenu.is-visible { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+  .MegaMenu__Content { display: flex; gap: 2.5rem; max-width: 1400px; margin: 0 auto; padding: 0 60px; box-sizing: border-box; }
+  .MegaMenu__Column { flex: 1; }
+  .MegaMenu__Title { font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .MegaMenu__ProductGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem 1.5rem; }
+  .MegaMenu__ProductItem { text-decoration: none; display: flex; flex-direction: column; }
+  .MegaMenu__ProductItem-image-wrapper { border-radius: 8px; overflow: hidden; aspect-ratio: 1/1; margin-bottom: 0.75rem; }
+  .MegaMenu__ProductItem-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  .MegaMenu__ProductItem:hover img { transform: scale(1.05); }
+  .MegaMenu__ProductTitle { color: white; text-align: center; font-size: 0.9rem; line-height: 1.4; }
+  .MegaMenu__LinkList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+  .MegaMenu__LinkList a { color: white; text-decoration: none; }
+  .MegaMenu__LinkList a:hover { text-decoration: underline; }
+  
+  /* --- CART COUNT BADGE STYLES --- */
+  .Header__CartIcon { position: relative; }
+  .Header__CartCountBadge {
+    display: flex; align-items: center; justify-content: center; position: absolute;
+    top: -2px; right: -5px; background-color: {{ section.settings.text_color }};
+    color: #121212; border-radius: 50%; font-size: 10px; font-weight: 700;
+    line-height: 1; min-width: 18px; height: 18px; padding: 0 3px;
+    transition: transform 0.2s ease, opacity 0.2s ease; z-index: 1; pointer-events: none;
+  }
+  .Header__CartCountBadge.is-hidden { transform: scale(0); opacity: 0; }
+  .Header__CartCount {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    color: #ffffff;
+    background: red;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* --- DRAWER TOGGLE BUTTONS (FIXED) --- */
+  /* Container dimensions can match your icon size */
+  .Header__DrawerToggles {
+    position: relative;
+    width: var(--header-icon-size, 40px);
+    height: var(--header-icon-size, 40px);
+  }
+
+  /* Stack the buttons and center their contents */
+  .Header__DrawerToggles .Header__Icon {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+
+  /* Default state: open button visible, close button hidden */
+  .Header__DrawerToggles .js-open-drawer {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+  .Header__DrawerToggles .js-close-drawer {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+  }
+
+  /* When sidebar-menu drawer is explicitly open, swap them */
+  .Header__DrawerToggles.is-drawer-open .js-open-drawer {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+  }
+  .Header__DrawerToggles.is-drawer-open .js-close-drawer {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  /* Respect user pref for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .Header__DrawerToggles .Header__Icon {
+      transition: none;
+    }
+  }
+  /* --- End of Drawer Toggle Styles --- */
+
+  @media (max-width: 1200px) { :root { --header-padding: 5px 30px; } .MegaMenu__Content { padding: 0 30px; } }
+  @media (max-width: 1024px) { .MegaMenu__Content { flex-direction: column; } }
+  @media (max-width: 768px) { .Header__Wrapper { padding: 10px 20px; } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // --- Mega Menu Functionality ---
+  const navItems = document.querySelectorAll('.Header__MainNav .HorizontalList__Item.has-dropdown');
+  navItems.forEach(item => {
+    const link = item.querySelector('a');
+    const menu = item.querySelector('.MegaMenu');
+    let hideTimeout;
+
+    if (!link || !menu) return;
+
+    const showMenu = () => {
+      clearTimeout(hideTimeout);
+      document.querySelectorAll('.MegaMenu.is-visible').forEach(m => {
+        if (m !== menu) m.classList.remove('is-visible');
+      });
+      link.setAttribute('aria-expanded', 'true');
+      menu.classList.add('is-visible');
+    };
+
+    const hideMenu = () => {
+      hideTimeout = setTimeout(() => {
+        link.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('is-visible');
+      }, 200);
+    };
+
+    item.addEventListener('mouseenter', showMenu);
+    item.addEventListener('mouseleave', hideMenu);
+    menu.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    menu.addEventListener('mouseleave', hideMenu);
+  });
+
+  // --- Dynamic Cart Count Functionality ---
+  function updateCartCountUI(count) {
+    const countElements = document.querySelectorAll('.Header__CartCount');
+    countElements.forEach(el => {
+      el.textContent = count;
+      if (count > 0) {
+        el.classList.remove('is-hidden');
+      } else {
+        el.classList.add('is-hidden');
+      }
+    });
+  }
+
+  document.body.addEventListener('cart:updated', function(evt) {
+    if (evt.detail && typeof evt.detail.cart.item_count !== 'undefined') {
+      updateCartCountUI(evt.detail.cart.item_count);
+    }
+  });
+
+  // --- Sidebar Drawer Toggle Buttons (FIXED) ---
+  const drawerToggles = document.querySelector('.Header__DrawerToggles');
+  const openBtn = document.querySelector('.Header__Icon[data-action="open-drawer"][data-drawer-id="sidebar-menu"]');
+  const closeBtn = document.querySelector('.Header__Icon[data-action="close-drawer"][data-drawer-id="sidebar-menu"]');
+  const drawer = document.getElementById('sidebar-menu');
+
+  if (openBtn && closeBtn && drawerToggles) {
+    function drawerIsOpen() {
+      if (!drawer) return false;
+      // Only consider it open if aria-hidden is explicitly "false"
+      if (drawer.getAttribute('aria-hidden') === 'false') return true;
+      if (drawer.classList.contains('is-open') || drawer.classList.contains('Drawer--open')) return true;
+      return false;
+    }
+
+    function syncButtons() {
+      const isOpen = drawerIsOpen();
+      drawerToggles.classList.toggle('is-drawer-open', isOpen);
+      openBtn.setAttribute('aria-expanded', String(isOpen));
+      closeBtn.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    openBtn.addEventListener('click', () => setTimeout(syncButtons, 50));
+    closeBtn.addEventListener('click', () => setTimeout(syncButtons, 50));
+
+    if (drawer) {
+      const mo = new MutationObserver(syncButtons);
+      mo.observe(drawer, { attributes: true, attributeFilter: ['aria-hidden', 'class', 'open'] });
+    }
+
+    // Only react to events specifically for sidebar-menu
+    document.addEventListener('drawer:open', (e) => {
+      if (e?.detail?.id === 'sidebar-menu') syncButtons();
+    });
+    document.addEventListener('drawer:close', (e) => {
+      if (e?.detail?.id === 'sidebar-menu') syncButtons();
+    });
+
+    // Initial state
+    syncButtons();
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "shopify-section--header",
+  "settings": [
+    { "type": "checkbox", "id": "use_sticky_header", "label": "Use sticky header", "default": true },
+    { "type": "image_picker", "id": "logo", "label": "Logo image (fallback)" },
+    { "type": "range", "id": "logo_max_width", "min": 50, "max": 350, "step": 5, "unit": "px", "label": "Logo image width", "default": 140 },
+    { "type": "range", "id": "mobile_logo_max_width", "min": 50, "max": 200, "step": 5, "unit": "px", "label": "Mobile logo image width", "default": 90 },
+    { "type": "header", "content": "Navigation" },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "Build dropdowns by nesting links in the Navigation admin. A second-level link to a collection will create a product grid."
+    },
+    { "type": "select", "id": "navigation_style", "label": "Navigation style", "options": [{ "value": "sidebar", "label": "Sidebar" }, { "value": "inline", "label": "Inline" }, { "value": "center", "label": "Center" }], "default": "inline" },
+    { "type": "header", "content": "Header Colors" },
+    { "type": "color", "id": "text_color", "label": "Text/icon color", "default": "#ffffff" },
+    { "type": "image_picker", "id": "alternate_logo", "label": "Logo for dark header", "info": "Use a light-colored version of your logo here. This will be prioritized over the fallback logo." }
+  ],
+  "presets": [ { "name": "Header" } ]
+}
+{% endschema %}

@@ -1,0 +1,158 @@
+{%- liquid
+  assign product_price = product.selected_or_first_available_variant.price
+  assign discount_percent = extra_discount | default: 5
+  assign discount_amount = product_price | times: discount_percent | divided_by: 100
+  assign final_price = product_price | minus: discount_amount
+  
+  assign formatted_price = final_price | money_without_trailing_zeros
+-%}
+
+<style>
+  .poc-container {
+    margin: 0.5rem  0rem 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .poc-header {
+    background-color: {{ bg_color | default: '#fcf1da' }};
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .poc-header-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    flex: 1; 
+  }
+
+  .poc-icon { 
+    width: 28px; 
+    height: 28px; 
+    flex-shrink: 0; 
+  }
+
+  /* Gradient Text Implementation */
+  .poc-main-text {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+    {% if text_gradient != blank %}
+      background: {{ text_gradient }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    {% else %}
+      color: #1a1a1a;
+    {% endif %}
+  }
+
+  .poc-badge {
+    background-color: {{ badge_bg | default: '#f3d6a4' }};
+    color: {{ badge_text_color | default: '#4a3614' }};
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .poc-timer {
+    font-size: 12px;
+    color: #d0021b;
+    font-weight: 600;
+    margin-top: 4px;
+    display: block;
+  }
+span#poc-countdown-product-template {
+    background: linear-gradient(90deg, #04B344 0%, #1B66EF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+  @media (max-width: 480px) {
+    .poc-main-text { font-size: 13px; }
+    .poc-badge { font-size: 12px; padding: 6px 10px; }
+  }
+</style>
+
+<div class="poc-container">
+  <div class="poc-header">
+    <div class="poc-header-left">
+      <div class="poc-icon">
+        <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pocGradient-{{ section.id }}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="{{ icon_gradient_1 | default: '#C2951A' }}" />
+              <stop offset="100%" stop-color="{{ icon_gradient_2 | default: '#B18C1F' }}" />
+            </linearGradient>
+          </defs>
+          <rect x="7" y="7" width="42" height="42" rx="21" fill="url(#pocGradient-{{ section.id }})" />
+          <line x1="22" y1="34" x2="34" y2="22" stroke="white" stroke-width="3" stroke-linecap="round" />
+          <circle cx="23" cy="23" r="2.5" fill="white" />
+          <circle cx="33" cy="33" r="2.5" fill="white" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="poc-main-text">
+          {{ main_text | replace: '[price]', formatted_price }}
+        </p>
+       
+      </div>
+    </div>
+
+     {% if show_timer %}
+          <span class="poc-timer" id="poc-countdown-{{ section.id }}">Offer ends in 10:00</span>
+        {% endif %}
+  </div>
+</div>
+
+{% if show_timer %}
+<script>
+(function() {
+  var display = document.querySelector('#poc-countdown-{{ section.id }}');
+  if (!display) return;
+
+  function updateCountdown() {
+    var now = new Date();
+
+    // 👉 always set end to today's end
+    var endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    var time = Math.floor((endOfDay - now) / 1000);
+
+    // 👉 if day finished → auto reset next day
+    if (time <= 0) {
+      endOfDay.setDate(endOfDay.getDate() + 1);
+      time = Math.floor((endOfDay - now) / 1000);
+    }
+
+    var hours = Math.floor(time / 3600);
+    var minutes = Math.floor((time % 3600) / 60);
+    var seconds = Math.floor(time % 60);
+
+    // format
+    hours = hours < 10 ? "0" + hours : hours;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    display.textContent =
+      "Offer ends in " + hours + ":" + minutes + ":" + seconds;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+})();
+</script>
+{% endif %}

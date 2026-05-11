@@ -1,0 +1,37 @@
+{% if product %}
+<link href="https://s3.ap-south-1.amazonaws.com/prod-merchants-assets/merchant-assets/zestmoney.widget.v3.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="https://s3.ap-south-1.amazonaws.com/prod-merchants-assets/merchant-assets/zestmoney.widget.v3.js"></script>
+
+<div id="zestmoney-overlay"></div>
+<div id="zestmoney-widget-container" class="zestmoney-widget-wrapper hide-zestmoney-widget"></div>
+
+<script type="text/javascript">
+  (async () => {
+            var zestMoneyWidgetElement = document.getElementById('zestmoney-widget-container');
+            var zestmoneyWidgetControl = document.getElementById('zestmoney-widget-control');
+
+
+            const  zest_price = parseFloat("{{ product.selected_or_first_available_variant.price }}") / 100;
+
+            var zestMoneyWidget = new ZestMoneyWidget(zestMoneyWidgetElement, {
+                merchantId: "2ca17ad9-1a1d-4434-851a-701ab34f94b3",
+                environment: "production",
+                basketAmount: zest_price || 0,
+                downpaymentAmount: null,
+                paymentGatewayId: "31a2b66b-f364-48f9-a7fd-6870a5a224b4",
+                widgetType: 'product',
+            });
+            let displayHtml = await zestMoneyWidget.getDisplayHTML();
+            if (displayHtml) {
+                zestmoneyWidgetControl.innerHTML = displayHtml;
+                var zestmoneyWidgetTrigger = document.getElementById('zestmoney-widget-trigger');
+                if (zestmoneyWidgetTrigger) {
+                    zestmoneyWidgetTrigger.addEventListener("click", function () {
+                        zestMoneyWidget.open();
+                    });
+                }
+            }
+        })()
+        
+</script>
+{% endif %}

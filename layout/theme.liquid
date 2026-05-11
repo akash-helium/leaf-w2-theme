@@ -1,0 +1,579 @@
+<!doctype html>
+
+<html class="no-js" lang="{{ shop.locale }}">
+  <head>
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M879G77K');</script>
+<!-- End Google Tag Manager -->
+
+
+    {% include 'gokwik'%}
+    {% include 'SEOManager' %}
+    <meta charset="utf-8"> 
+    <meta name="msvalidate.01" content="A126439A19D87BD316B6F307A1D999B8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, user-scalable=0">
+    <meta name="theme-color" content="{{ settings.accent_color }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css"/>
+
+    {%- if settings.favicon -%}
+    <link rel="shortcut icon" href="{{ settings.favicon | img_url: '32x32' }}" type="image/png">
+    {%- endif -%}
+    {% render 'sr-checkout' %}
+    <script>
+  function getUserTimezone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  function renderButton(showShiprocketCheckout) {
+    let modifiedCSS = "";
+    if (showShiprocketCheckout) {
+      modifiedCSS = `
+        button[name="checkout"]{display:none !important;}
+        .shopify-payment-button__button.shopify-payment-button__button--unbranded{display:none !important;}
+      `;
+    } else {
+      modifiedCSS = `
+        .shiprocket-headless{display:none !important;}
+      `;
+    }
+    const styleElement = document.createElement("style");
+    styleElement.textContent = modifiedCSS;
+    document.head.appendChild(styleElement);
+  }
+  function checkAndSetButtonVisibility() {
+    const indiaTimezones = ["Asia/Kolkata", "Asia/Calcutta"];
+    const userTimezone = getUserTimezone();
+    const isIndia = indiaTimezones.includes(userTimezone);
+    renderButton(isIndia);
+  }
+  checkAndSetButtonVisibility();
+</script>
+	<link rel="preload" href="{{ 'theme.scss.css' | asset_url }}" as="style">
+    <link rel="stylesheet" href="{{ 'theme.scss.css' | asset_url }}">
+
+    {% include 'social-meta-tags' %}
+    {% if product.id == 7374752841909%}
+      <style>
+        [data-tag="review"] .coverflow_slide {
+          box-shadow: 0px 0px 10px 1px rgba(29,29,29,.8) ! important;
+        }
+      </style>
+    {% endif %}
+
+  {% if template == 'index' or template == 'collection' or template == 'product' %}
+  {% assign url_to_remove = 0 %}
+  {% assign lines = content_for_header | newline_to_br | split: '<br />' %}
+  {% for line in lines %}
+    {% if line contains 'var urls' %}
+      {% if url_to_remove == 0 %}
+        {% capture new_line %}
+        {% endcapture %}
+        {% assign empty_array = new_line | append: "var urls = [];" %}
+        {% assign content_for_header = content_for_header | replace: line, empty_array %}
+        <!-- vvk -->
+    	{% assign url_string = line | remove: "var urls = [" | remove: "];" | strip %}
+      {% else %}
+        {% assign url_string = line | remove: "var urls = [" | remove: "];" | strip %}
+        {% assign url_array = url_string | split: ',' | uniq %}
+          {% for url in url_array %}
+            {% if forloop.index == url_to_remove %}
+              {% assign content_for_header = content_for_header | replace: url, '""' %}
+        {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  {% endif %}
+    {{ content_for_header }} 
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>  <script>
+    // This allows to expose several variables to the global scope, to be used in scripts
+    window.theme = {
+      template: {{ template.name | json }},
+      shopCurrency: {{ shop.currency | json }},
+      moneyFormat: {{ shop.money_format | json }},
+      moneyWithCurrencyFormat: {{ shop.money_with_currency_format | json }},
+      currencyConversionEnabled: {{ settings.currency_conversion_enabled | json }},
+      currencyConversionMoneyFormat: {{ settings.currency_conversion_money_format | json }},
+      currencyConversionRoundAmounts: {{ settings.currency_conversion_round_amounts | json }},
+      productImageSize: {{ settings.product_image_size | json }},
+      searchMode: {{ settings.search_mode | json }},
+      showPageTransition: {{ settings.show_page_transition | json }},
+      showElementStaggering: {{ settings.show_element_staggering | json }},
+      showImageZooming: {{ settings.show_image_zooming | json }},
+      enableExperimentalResizeObserver: false
+    };
+
+    window.languages = {
+      cartAddNote: {{ 'cart.general.add_note' | t | json }},
+      cartEditNote: {{ 'cart.general.edit_note' | t | json }},
+      productImageLoadingError: {{ 'product.slideshow.image_loading_error' | t | json }},
+      productFormAddToCart: {% if product.template_suffix == 'pre-order' %}{{ 'product.form.pre_order' | t | json }}{% else %}{{ 'product.form.add_to_cart' | t | json }}{% endif %},
+      productFormUnavailable: {{ 'product.form.unavailable' | t | json }},
+      productFormSoldOut: {{ 'product.form.sold_out' | t | json }},
+      shippingEstimatorOneResult: {{ 'cart.shipping_estimator.one_result_title' | t | json }},
+      shippingEstimatorMoreResults: {{ 'cart.shipping_estimator.more_results_title' | t | json }},
+      shippingEstimatorNoResults: {{ 'cart.shipping_estimator.no_results_title' | t | json }}
+    };
+
+    window.lazySizesConfig = {
+      loadHidden: false,
+      hFac: 0.5,
+      expFactor: 2,
+      ricTimeout: 150,
+      lazyClass: 'Image--lazyLoad',
+      loadingClass: 'Image--lazyLoading',
+      loadedClass: 'Image--lazyLoaded'
+    };
+
+    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    document.documentElement.style.setProperty('--window-height', window.innerHeight + 'px');
+
+    // We do a quick detection of some features (we could use Modernizr but for so little...)
+    (function() {
+      document.documentElement.className += ((window.CSS && window.CSS.supports('(position: sticky) or (position: -webkit-sticky)')) ? ' supports-sticky' : ' no-supports-sticky');
+      document.documentElement.className += (window.matchMedia('(-moz-touch-enabled: 1), (hover: none)')).matches ? ' no-supports-hover' : ' supports-hover';
+    }());
+
+    window.onpageshow = function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+
+    </script>
+
+    <script src="{{ 'lazysizes.min.js' | asset_url }}" async></script>
+
+    {% if settings.currency_conversion_enabled %}
+    <script src="//cdn.shopify.com/s/javascripts/currencies.js" defer></script>
+    {% endif %}
+
+    {%- if template == 'customers/addresses' -%}
+    <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
+    <script src="{{ 'customer_area.js' | shopify_asset_url }}" defer></script>
+    {%- endif -%}
+
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,Element.prototype.closest,Element.prototype.remove,Element.prototype.classList,Array.prototype.includes,Array.prototype.fill,Object.assign,CustomEvent,IntersectionObserver,IntersectionObserverEntry" defer></script>
+    <script src="{{ 'libs.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'theme.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'custom.js' | asset_url }}" defer></script>
+
+    {% include 'microdata-schema' %}
+    <script>if (typeof(_sokShops) === "undefined") { _sokShops = {};}_sokShops.getNumber = function(val) { val = val.replace(/,/g, ""); var reg = /\d+(\.\d{1,2})?/; if (val.length && val.match(reg).length) { return parseFloat(val.match(reg)[0]); } else { return 0; }};{% if shop.customer_accounts_enabled %} {% if customer %} _sokShops.customer = { cust_name: "{{ customer.name }}", cust_email: "{{ customer.email }}", cust_location: "{{ customer.default_address.street }}", cust_city: "{{ customer.default_address.city }}", cust_locality: "{{ customer.default_address.zip }}", currency: "{{ shop.currency }}" }; {% endif %}{% endif %}{% if template contains "product" %} {% if product %} _sokShops.product = { lead_step: "viewproduct", product_names: "{{ product.title | replace "\"" , "" | replace "|",""}}", sku_id: "{{ product.first_available_variant.id }}", product_prices: _sokShops.getNumber("{{ product.price | money_without_currency }}"), currency: "{{ shop.currency }}", product_category: "{{ product.collections[0].title }}", brand: "{{ product.vendor }}", {% if product.featured_image %} product_imageurl: "https:{{ product.featured_image | product_img_url: 'master' }}", {% endif %}  };  {% endif %}{% endif %}{% if template contains "collection" %} {% if collection %} _sokShops.collection = {lead_step: "viewcategory",product_category: "{{ collection.title }}" }; {% endif %}{% endif %}{% if template contains "search" %} {% if search %} _sokShops.search = {lead_step: "search",search_querystring: "{{ search.terms }}" }; {% endif %}{% endif %}{% if cart %} _sokShops.cart = { {% if template contains "cart" %}lead_step: "funnel_checkout",{% if checkout %} delivery_method: "{{ checkout.shipping_method.title }}", payment_method: "{{ checkout.transactions[0].gateway }}", discount_details: "{{ checkout.discounts[0].code }}",{% endif %}sku_id: [ {% for line_item in cart.items %} "{{ line_item.product.first_available_variant.id }}",{% endfor %} ], {% if customer %} cust_location: "{{ customer.default_address.street }}", {% endif %} {% else %} product_imageurl: [{% for line_item in cart.items %} "https:{{ line_item.product.featured_image | product_img_url: 'master' }}",{% endfor %} ], sku_id: [{% for line_item in cart.items %} "{{ line_item.product.first_available_variant.id }}",{% endfor %} ], {% endif %} product_names: [{% for line_item in cart.items %} "{{ line_item.title | replace "\"" , "" | replace "|", "" }}",{% endfor %} ], sku_url: [{% for line_item in cart.items %} "{{ line_item.url }}",{% endfor %} ],product_prices: [{% for line_item in cart.items %} _sokShops.getNumber("{{ line_item.price | money_without_currency }}"),{% endfor %} ], product_quantities: [{% for line_item in cart.items %} {{ line_item.quantity }},{% endfor %} ], cart_amount: _sokShops.getNumber("{{ cart.total_price | money_without_currency }}"), currency: "{{ shop.currency }}" };{% endif %}</script>
+
+{% comment %} 
+    <script>
+      (function() {
+        var ta = document.createElement('script'); ta.type = 'text/javascript'; ta.async = true;
+        ta.src = 'https://analytics.tiktok.com/i18n/pixel/sdk.js?sdkid=BRMARARJ8575DDH4F91G';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ta, s);
+      })();
+    </script> {% endcomment %}
+
+    <meta name="facebook-domain-verification" content="m0isbh8169lmx7vvxxhy77nbflkcji"/>
+
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-GLGYRCH0W2"></script>
+	<script>
+  		window.dataLayer = window.dataLayer || [];
+  		function gtag(){dataLayer.push(arguments);}
+  		gtag('js', new Date());
+
+  		gtag('config', 'G-GLGYRCH0W2');
+      
+	</script>
+    
+    <!-- Global site tag (gtag.js) - Google Ads: 10795998048 -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=AW-10795998048"></script>
+	<script>
+  		window.dataLayer = window.dataLayer || [];
+  		function gtag(){dataLayer.push(arguments);}
+  		gtag('js', new Date());
+
+  		gtag('config', 'AW-10795998048');
+	</script>
+
+    
+    
+
+    
+    
+    
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const myParam = urlParams.get('clearCart');
+      if(myParam){
+        setTimeout(function(){
+          document.cookie = "cart" + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+          window.location.href="/";
+        })
+      };
+      if(!!window.performance && window.performance.navigation.type === 2){
+        console.log('Reloading');
+        window.location.reload();
+      }
+      const ua = window.navigator.userAgent;
+
+
+
+      if( ua.match("phonepe-webview")!=null || ((/AppContainer/i.test(ua)) != false )){
+
+        var styles = '#smile-ui-container { display:none; } ';
+        var styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = styles;
+        document.head.appendChild(styleSheet);
+        setTimeout(function(){
+          $(".account_link").hide();
+          $(".Footer__Social").hide();
+          $(".shopify-payment-button").hide();
+          $(".warranty-registration").hide();
+          $(".SidebarMenu__Social").hide();
+          $(".Footer__Block--newsletter").hide();
+          $(".Article__ShareButtons").hide();
+          $(".cod_checker").hide();
+        },500);
+      }
+    </script>
+
+    {% include 'judgeme_core' %}
+       
+<!--Troopod Clarity end-->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "nz29u47hmq");
+</script>
+<!--Troopod Clarity end-->
+   
+</head>
+
+  <body style="width:100vw;  class="prestige--v3 {% if template.directory %}template-{{ template.directory | handle }}{% endif %} template-{{ template.name | handle }}">
+    
+
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M879G77K"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+    <a class="PageSkipLink u-visually-hidden" href="#main">{{ 'header.navigation.skip_to_content' | t }}</a>
+    <span class="LoadingBar"></span>
+    <div class="PageOverlay"></div>
+    <div class="PageTransition"></div>		
+
+    {% section 'popup' %}
+    {% section 'sidebar-menu' %}
+
+    {%- if template != 'cart' -%}
+    {% include 'cart-drawer' %}
+    {%- endif -%}
+
+    <div class="PageContainer">
+      {% unless template contains 'index' %}
+        
+      {% section 'announcement' %}
+      {% endunless %}
+      {% section 'header' %}
+
+      <main id="main" role="main">
+        {{ content_for_layout }}
+      </main>
+
+      {% section 'footer' %}
+    </div>
+
+    {%- comment -%}
+    --------------------------------------------------------------------------------------------------------------------
+    SEARCH FORM (available globally)
+    --------------------------------------------------------------------------------------------------------------------
+    {%- endcomment -%}
+
+    <div id="Search" class="Search Modal Modal--fullScreen" aria-hidden="true" data-scrollable>
+      <div class="Search__SearchBar">
+        <form action="/search" name="GET" role="search" class="Search__Form">
+          <input type="search" class="Search__Input Heading" name="q" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="{{ 'search.general.input_placeholder' | t }}" autofocus>
+          <input type="hidden" name="type" value="product">
+        </form>
+
+        <button class="Search__Close Link Link--primary" data-action="close-modal">{% include 'icon' with 'close' %}</button>
+      </div>
+
+      <div class="Search__Results">
+        {%- if settings.search_mode != 'product' -%}
+        <div class="PageLayout PageLayout--breakLap">
+          <div class="PageLayout__Section"></div>
+          <div class="PageLayout__Section PageLayout__Section--secondary"></div>
+        </div>
+        {%- endif -%}
+      </div>
+    </div>
+    {% include 'smile-initializer' %}
+    <script>
+      $(document).ready(function(){
+        $("body").on('click','.Popover__Value',function(){
+          $(".img_title").load(window.location.href+"/ .tab-1");
+        });
+      });
+    </script>
+    {% if template contains "index" %}
+    <script>
+      $(document).ready(function(){
+        $("body").on('click','.Popover__Value',function(){
+          alert();
+
+          $(".stickyHed2").load(window.location.href+"/ .img_title");
+        });
+      });
+      window.onscroll = function() {myFunction()};
+
+      var header = document.getElementById("section-header");
+      var sticky = header.offsetTop+40;
+
+      function myFunction() {
+        if (window.pageYOffset > sticky) {
+          header.classList.add("sticky");
+        } else {
+          header.classList.remove("sticky");
+        }
+      }
+    </script>
+    {% endif %}
+    {% include 'iStock-notify-me' with 'iStockfooter' %}
+
+    {% include 'whatsapp-share' %}
+     {% if template == 'index' or template == 'collection' or template == 'product' %}
+    <script type="text/javascript">
+      $(document).ready(function() {
+        setTimeout(function(){
+          var s = '{{url_string }}';
+          s = s.split('"').join('');
+          s = s.split(',');
+          for (var i = 0; i < s.length; i++) { 
+            var scrpt = document.createElement("script");
+            scrpt.type = 'text/javascript';
+            scrpt.src = s[i];
+            $("head").append(scrpt);
+          }
+        },7000);
+      });
+    </script>
+    {% endif %}
+  
+<!-- **BEGIN** Hextom QAB Integration // Main Include - DO NOT MODIFY -->
+    {% render 'hextom_qab_main', product: product, customer: customer %}
+    <!-- **END** Hextom QAB Integration // Main Include - DO NOT MODIFY -->
+  
+  
+
+{% include 'zest-money-widget' %}
+<!-- Begin Shopify–payment-cart JavaScript -->
+<script type="text/javascript">
+
+  var mid = '6797';
+
+</script>
+<script src="https://checkout-merchant.snapmint.com/js/v1/6797" defer></script>
+<!-- End Shopify-payment JavaScript -->
+    
+
+<script src='https://static-cdn.trackier.com/js/trackier-web-sdk.js'></script>
+<script src="https://static-cdn.trackier.com/js/trackier-websdk-init.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+  <script src="{{ 'helium-animation-lib.js' | asset_url }}" defer="defer" type="text/javascript"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const slider = document.querySelector('.first-slider');
+  if (!slider) return;
+
+  const wrapper = slider.querySelector('.media-wrapper');
+  const items = slider.querySelectorAll('.media-item');
+  const nextBtn = slider.querySelector('.arrow.right');
+  const prevBtn = slider.querySelector('.arrow.left');
+
+  let current = 0;
+  const total = items.length;
+
+  function updateSlide() {
+    wrapper.style.transform = `translateX(-${current * 100}%)`;
+  }
+
+  function nextSlide() {
+    current = (current + 1) % total;
+    updateSlide();
+  }
+
+  function prevSlide() {
+    current = (current - 1 + total) % total;
+    updateSlide();
+  }
+
+  // Auto slide
+  setInterval(nextSlide, 2000);
+
+  // Arrows
+  nextBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    nextSlide();
+  });
+
+  prevBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    prevSlide();
+  });
+
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+  const sliders = document.querySelectorAll('.product-media-slider');
+
+  sliders.forEach((slider, index) => {
+
+    const wrapper = slider.querySelector('.media-wrapper');
+    const items = slider.querySelectorAll('.media-item');
+    const nextBtn = slider.querySelector('.arrow.right');
+    const prevBtn = slider.querySelector('.arrow.left');
+
+    if (!wrapper || items.length === 0) return;
+
+    let current = 0;
+    let interval = null;
+    const total = items.length;
+
+    let startX = 0;
+    let currentTranslate = 0;
+    let isDragging = false;
+
+    function updateSlide(animated = true) {
+      wrapper.style.transition = animated ? 'transform 0.35s ease' : 'none';
+      wrapper.style.transform = `translateX(-${current * 100}%)`;
+    }
+
+    function nextSlide() {
+      current = (current + 1) % total;
+      updateSlide();
+    }
+
+    function prevSlide() {
+      current = (current - 1 + total) % total;
+      updateSlide();
+    }
+
+    /* AUTO/HOVER SLIDE */
+    if (index === 0) {
+      interval = setInterval(nextSlide, 2000);
+    } else {
+      slider.addEventListener('mouseenter', () => {
+        if (!interval) interval = setInterval(nextSlide, 1500);
+      });
+
+      slider.addEventListener('mouseleave', () => {
+        clearInterval(interval);
+        interval = null;
+        current = 0;
+        updateSlide();
+      });
+    }
+
+    /* ARROWS */
+    nextBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      nextSlide();
+    });
+
+    prevBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      prevSlide();
+    });
+
+    /* DRAG / SWIPE SUPPORT */
+    function dragStart(x) {
+      isDragging = true;
+      startX = x;
+      wrapper.style.transition = 'none';
+    }
+
+    function dragMove(x) {
+      if (!isDragging) return;
+
+      const diff = x - startX;
+      currentTranslate = (-current * slider.offsetWidth) + diff;
+
+      wrapper.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    function dragEnd(x) {
+      if (!isDragging) return;
+
+      isDragging = false;
+
+      const diff = x - startX;
+      const threshold = slider.offsetWidth * 0.2;
+
+      if (diff < -threshold) {
+        nextSlide();
+      } else if (diff > threshold) {
+        prevSlide();
+      } else {
+        updateSlide();
+      }
+    }
+
+    /* Mouse Events */
+    slider.addEventListener('mousedown', (e) => dragStart(e.clientX));
+    window.addEventListener('mousemove', (e) => dragMove(e.clientX));
+    window.addEventListener('mouseup', (e) => dragEnd(e.clientX));
+
+    /* Touch Events */
+    slider.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
+    slider.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
+    slider.addEventListener('touchend', (e) => {
+      dragEnd(e.changedTouches[0].clientX);
+    });
+
+  });
+
+});
+  </script>
+  
+</body>
+  
+ {% render 'w369'%}
+  	
+	<style>
+	.w369-tag-line.leaf{
+    font-size: 12px !important;
+	}
+	.w369-tag-line-img.leaf
+	{
+    width: 96px !important;
+	}
+	.div-header{
+    display: flex !important;
+      justify-content: flex-start !important;
+	}
+      @media (min-width: 480px) {
+    .div-header.leaf{
+        display: block !important;
+    }
+	}
+     .jdgm-star {
+    color: #fed905 !important;
+}
+	</style>
+  
+  <script src="{{ 'perpule-checkout.js' | asset_url }}" defer="defer"></script>
+  
+  
+</html>

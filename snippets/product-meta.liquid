@@ -1,0 +1,230 @@
+<div class="ProductMeta">
+  {%- if section.settings.show_vendor and product.vendor != blank -%}
+    <h2 class="ProductMeta__Vendor Heading u-h6">
+      {%- assign vendor_handle = product.vendor | handle -%}
+      {%- assign collection_for_vendor = collections[vendor_handle] -%}
+
+      {%- unless collection_for_vendor.empty? -%}
+        <a href="{{ collection_for_vendor.url }}">{{ product.vendor }}</a>
+      {%- else -%}
+        {{- product.vendor -}}
+      {%- endunless -%}
+    </h2>
+  {%- endif -%}
+
+  <div>
+  <h1 class="ProductMeta__Title Heading u-h2">
+    {%- if template.name == 'product' -%}
+      {{- product.title -}}
+    {%- else -%}
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    {%- endif -%}
+  </h1>
+   {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
+</div>
+
+  {%- if product.template_suffix != 'coming-soon' -%}
+    <div class="ProductMeta__PriceList Heading">
+      {%- assign current_variant = product.selected_or_first_available_variant -%}
+      
+      <!-- Logic to calculate discount -->
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        {%- assign savings = current_variant.compare_at_price | minus: current_variant.price -%}
+        {%- assign discount_percentage = savings | times: 100.0 | divided_by: current_variant.compare_at_price | round -%}
+  
+         <div class="ProductMeta__PriceWrapper">
+
+            <span class="ProductMeta__Price Price Price--highlight Text--subdued u-h4" data-money-convertible>
+              {{ current_variant.price  | money_without_trailing_zeros 
+              | replace: "Rs.", "" 
+              | replace: "Rs", "" 
+              | strip 
+              | prepend: "₹ "  }}
+            </span>
+
+            <span class="ProductMeta__Price Price Price--compareAt Text--subdued u-h4" data-money-convertible>
+              {{ current_variant.compare_at_price | money_without_trailing_zeros 
+              | replace: "Rs.", "" 
+              | replace: "Rs", "" 
+              | strip 
+              | prepend: "₹ "  }}
+            </span>
+
+            <span class="ProductMeta__Discount">
+              {{ discount_percentage }}% OFF
+            </span>
+          </div>
+
+            <div class="prepaid-offer">
+            {% if shop.metafields.custom.discount_string %}
+              {{ shop.metafields.custom.discount_string }}
+            {% else %}
+              Extra 5% Off on Prepaid Orders
+            {% endif %}
+          </div>
+
+      {%- else -%}
+        <!-- Regular Price (No Discount) -->
+        <div class="ProductMeta__PriceWrapper">
+          <span class="ProductMeta__Price Price Text--subdued u-h4" data-money-convertible>
+           {{ current_variant.price 
+              | money_without_trailing_zeros 
+              | replace: "Rs.", "" 
+              | replace: "Rs", "" 
+              | strip 
+              | prepend: "₹ " 
+            }}
+
+          </span>
+
+               <div class="prepaid-offer">
+            {% if shop.metafields.custom.discount_string %}
+              {{ shop.metafields.custom.discount_string }}
+            {% else %}
+              {% comment %} Extra 5% Off on Prepaid Orders {% endcomment %}
+            {% endif %}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if show_description
+    and section.settings.description_below_add_to_cart == false
+    and product.description != blank
+  -%}
+    <div class="ProductMeta__Description Rte">
+      {{ product.description }}
+    </div>
+  {%- endif -%}
+</div>
+
+
+<style>
+
+    
+    .ProductMeta__Title {
+    font-size: 2rem;
+    font-weight: 600;
+    max-width: 85%;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    color: black;
+    letter-spacing: 0px;
+  }
+
+  .ProductMeta__PriceList {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Changed from baseline to center for better alignment */
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Wrapper to keep Price, Compare Price, and Discount together */
+  .ProductMeta__PriceWrapper {
+    display: flex;
+    align-items: baseline;
+    width:100%;
+    gap: 8px;
+  }
+
+
+
+  .ProductMeta__Price {
+    font-weight: 600;
+    color: black;
+    letter-spacing: 0px;
+    font-size: 1.5rem;
+    width: auto; /* Changed from 100% so they can sit side-by-side */
+  }
+
+  .Price--compareAt::before{
+    display:none;
+  }
+
+  .Price--compareAt {  
+    text-decoration: line-through;
+    color: #8e8e8e; /* Gray */
+    font-size: 1.1rem; /* Slightly smaller than selling price */
+    font-weight: 400;
+    margin:0px 8px !important;
+
+  }
+
+  /* New Discount Style */
+  .ProductMeta__Discount {
+    color: #1a8f3e; /* Green color */
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .prepaid-offer {
+    font-size: 0.8rem;
+    background: linear-gradient(90deg, #04B344 0%, #1B66EF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: underline;
+    margin-bottom: 0; /* Removed bottom margin as flex gap handles it */
+    letter-spacing: 0px;
+    text-transform: capitalize;
+    text-align: right;
+    margin-left:auto;
+    white-space: nowrap;
+  }
+
+  #sm-widget-btn {
+    display: none !important;
+  }
+
+  @media screen and (max-width: 767px) {
+
+     .ProductMeta__PriceWrapper {
+    display: flex;
+    align-items: baseline;
+    width:100%;
+    gap: 0px;
+  }
+
+    .ProductMeta .ProductMeta__Title {
+      text-align: left;
+      font-size: 1.5rem;
+      max-width: 100%;
+    }
+
+    .ProductMeta__PriceList {
+      align-items: center !important;
+      justify-content: flex-start; /* Align left on mobile */
+      gap: 5px;
+    }
+    
+    .ProductMeta__PriceWrapper {
+      width: 100%; /* Take full width on mobile so offer drops below if needed */
+      flex-wrap: wrap;
+      align-items: baseline;
+    }
+
+    .ProductMeta .ProductMeta__Price {
+      text-align: left;
+      font-weight: bold;
+    }
+    
+    .prepaid-offer {
+      margin-bottom: 0px;
+      text-align: left; /* Align left on mobile */
+      width: 100%;
+   }
+    .Container  {
+    padding: 0px 16px !important;
+    }.ProductFeatures__Text{
+    text-align:left;
+    }
+  .jdgm-widget{
+  display:flex !important;
+  }
+  }
+
+
+</style>

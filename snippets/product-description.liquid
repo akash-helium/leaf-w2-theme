@@ -1,0 +1,408 @@
+ <div class="stickyHed2">
+   <div class="img_title">
+     <div class="tab-1">
+    <div class="selected_var_image">
+        {% if product.selected_or_first_available_variant.featured_image != blank %}
+        <img src="{{product.selected_or_first_available_variant.featured_image | img_url:"100x"}}">
+        {% else %}
+         <img src="{{product.featured_image | img_url:"100x"}}">
+        {% endif %}
+      </div>
+       <div class="selected_var_title_price">
+         <dd>
+           <strong class="prod_title">
+            {{product.title}}
+           </strong>
+         </dd>
+        <span id="ProductPrice" class="price" itemprop="price">
+          {{product.selected_or_first_available_variant.price| money}}
+        </span>
+         </div>
+      </div>
+  </div>
+  
+  
+   <ul class="desk_data_custom common_class_custom">
+     <li><a href="#proDesc1" class="tab_active proDescAtg" style="text-decoration: none;">overview</a></li>
+     <li><a href="#techSpec" class="techSpecAtg" style="text-decoration: none;" id="myBtn">tech specs</a></li>
+     <li><a href="#judgeme_product_reviews" class="revAtg" style="text-decoration: none;">RATINGS <span>&amp; REVIEWS</span></a></li>
+   </ul>
+   <ul class="mob_data_custom common_class_custom">
+     <li><a href="#proDesc1mob" class="tab_active" style="text-decoration: none;">overview</a></li>
+     <li><a href="#techSpecmob" class="techSpecAtg" style="text-decoration: none;" id="myBtn">tech specs</a></li>
+     <li><a href="#judgeme_product_reviews" style="text-decoration: none;">RATINGS <span>&amp; REVIEWS</span></a></li>
+   </ul>
+  <div class="add_button_container">
+      <span class="button_cart btn_animation">
+{% comment %}        
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 459.529 459.529" style="enable-background:new 0 0 459.529 459.529;" xml:space="preserve">
+          <g>
+            <g>
+              <path d="M17,55.231h48.733l69.417,251.033c1.983,7.367,8.783,12.467,16.433,12.467h213.35c6.8,0,12.75-3.967,15.583-10.2    l77.633-178.5c2.267-5.383,1.7-11.333-1.417-16.15c-3.117-4.817-8.5-7.65-14.167-7.65H206.833c-9.35,0-17,7.65-17,17    s7.65,17,17,17H416.5l-62.9,144.5H164.333L94.917,33.698c-1.983-7.367-8.783-12.467-16.433-12.467H17c-9.35,0-17,7.65-17,17    S7.65,55.231,17,55.231z" style="fill: rgb(255, 255, 255);"></path>
+              <path d="M135.433,438.298c21.25,0,38.533-17.283,38.533-38.533s-17.283-38.533-38.533-38.533S96.9,378.514,96.9,399.764    S114.183,438.298,135.433,438.298z" style="fill: rgb(255, 255, 255);"></path>
+              <path d="M376.267,438.298c0.85,0,1.983,0,2.833,0c10.2-0.85,19.55-5.383,26.35-13.317c6.8-7.65,9.917-17.567,9.35-28.05    c-1.417-20.967-19.833-37.117-41.083-35.7c-21.25,1.417-37.117,20.117-35.7,41.083    C339.433,422.431,356.15,438.298,376.267,438.298z" style="fill: rgb(255, 255, 255);"></path>
+            </g>
+          </g>
+
+        </svg> 
+        {% endcomment %}
+        {% comment %}
+        added code to change cart svg image
+        {%endcomment%}
+        {% comment %} <span class="hidden-tablet-and-up"><svg class="Icon Icon--cart" role="presentation" viewBox="0 0 17 20">
+          <path d="M0 20V4.995l1 .006v.015l4-.002V4c0-2.484 1.274-4 3.5-4C10.518 0 12 1.48 12 4v1.012l5-.003v.985H1V19h15V6.005h1V20H0zM11 4.49C11 2.267 10.507 1 8.5 1 6.5 1 6 2.27 6 4.49V5l5-.002V4.49z" fill="currentColor"></path>
+          </svg></span>
+<!--   svg cart icon       -->
+        {% if section.settings.enable_cart_icon %}
+          <span class="hidden-phone">{{ section.settings.svg }}</span>
+          {% if cart.item_count > 0%}
+          <span class="Header__CartDot is-visible dot_stl"></span>
+          {% endif %}
+        {% endif %} {% endcomment %}
+         
+         <span class="hidden-tablet-and-up"><svg class="Icon Icon--cart" role="presentation" viewBox="0 0 17 20">
+          <path d="M0 20V4.995l1 .006v.015l4-.002V4c0-2.484 1.274-4 3.5-4C10.518 0 12 1.48 12 4v1.012l5-.003v.985H1V19h15V6.005h1V20H0zM11 4.49C11 2.267 10.507 1 8.5 1 6.5 1 6 2.27 6 4.49V5l5-.002V4.49z" fill="currentColor"></path>
+          </svg></span>
+<!--   svg cart icon       -->
+        {% if section.settings.enable_cart_icon %}
+          <span class="hidden-phone">{{ section.settings.svg }}</span>
+          {% if cart.item_count > 0%}
+          <span class="Header__CartDot is-visible dot_stl"></span>
+          {% endif %}
+        {% endif %}
+         
+        
+        {% if product.available %}
+         <span style="margin-top:2px;"> ADD TO CART</span>
+        {% else %}
+         <span style="margin-top:2px;"> SOLD OUT</span>
+        {% endif %}
+
+    </span>
+
+    </div>
+</div>
+
+<style>
+  #ProductPrice{
+    color:#00aeef;
+    font-weight: bold;
+  }
+.stickyHed2 li{
+  display:inline-block;
+  text-decoration:none;
+  text-transform:uppercase;
+  font-size:18px;
+  color:gray;
+  flex-basis: 33.33%;
+  text-align: center;
+  border-right: 1px solid #dfe3e8;
+  line-height: 18px;
+}
+.selected_var_title_price dd {
+    display: block;
+    width: 179px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  	margin:0px;
+    color:black;
+}
+
+.img_title, .add_button_container{
+  opacity:1;
+  }
+  .sticky_add_to_cart .img_title, .sticky_add_to_cart .add_button_container{
+    opacity:1;
+  }
+  .showButton .img_title, .showButton .add_button_container{
+  opacity:1;
+  }
+.stickyHed2{
+        background-color:white;
+		position: sticky;
+        position: -webkit-sticky;
+      	top: 133px;
+        border-top:1px solid #dfe3e8;
+        margin-top: 41px;
+        display:flex;
+  		align-items:center;
+        padding: 5px 0px;
+  		z-index:9999;
+        border-bottom: 1px solid rgba(28, 27, 27, 0.45098039215686275);
+      }
+   .stickyHed2 ul{
+   		display:flex;
+        width:100%;
+/*         //margin-top: 22px; */
+        justify-content: center;
+    }
+    svg#Capa_1 {
+      width: 20px;
+      height: 20px;
+      margin: 0px 5px;
+  	}
+  .btn_animation{
+    border: 1px solid black;
+    border-radius: 3px;
+    width: 100px;
+    height: 30px;
+    display: block;
+    background: linear-gradient(to right, white 50%, black 50%);
+    background-size: 200% 100%;
+    background-position: right bottom;
+    transition: all .5s ease-out;
+    color:#fff;
+    cursor:pointer;
+
+  }
+  .btn_animation:hover {
+    background-position: left bottom;
+    color:#000;
+  }
+  .dot_stl{
+    color: #000;
+  }
+  .dot_stl:hover{
+   color:#fff;
+  }
+  .tab_active {
+  color: #00aeef !important;
+  font-weight: bold;
+}
+
+
+  @media(max-width: 767px){
+    .stickyHed2{
+      top:55px;
+    }
+   .stickyHed2 li{
+     padding-right: 53px;
+    }
+    .Rte img{
+   margin-top: 0em !important; 
+  margin-bottom: 0em !important; 
+    }
+    .stickyHed2 ul li a span{
+    	display:none;
+    }
+    .stickyHed2 ul li a {
+      font-size: 14px;
+    }
+    .stickyHed2{
+      padding:10px 0px !important;
+    }
+    .selected_var_image img {
+      max-width: 50px;
+    }
+    .sticky_add_to_cart_inner {
+      align-items: center;
+    }
+  }
+  @media(min-width:1024px) and (max-width:1159px){
+    .stickyHed2 li {
+      font-size: 14px;
+      flex-basis: 30.33%;
+    }
+  }
+  .scrolled a{
+  	color:#00aeef;
+    font-weight: bold;
+  }
+</style>
+         <script src='https://cdnjs.cloudflare.com/ajax/libs/mobile-detect/1.4.3/mobile-detect.js'></script>
+
+<script>
+    $(window).scroll(function() {
+    var offset = $(".stickyHed2").offset().top;
+
+    if ($(window).scrollTop() >= offset) {
+       $(".stickyHed2").addClass('showButton');
+    }else{
+    $(".stickyHed2").removeClass('showButton');
+    }
+});
+  $.fn.isInViewport = function() {
+    var elementTop = $(this).offset().top+200;
+    var elementBottom = elementTop + $(this).outerHeight();
+
+    var viewportTop = $(window).scrollTop();
+    var viewportBottom = viewportTop + $(window).height();
+
+    return elementBottom > viewportTop && elementTop < viewportBottom;
+};
+$.fn.isInanotherViewport = function() {
+    var elementTop = $(this).offset().top-200;
+    var elementBottom = elementTop + $(this).outerHeight();
+
+    var viewportTop = $(window).scrollTop();
+    var viewportBottom = viewportTop + $(window).height();
+
+    return elementBottom > viewportTop && elementTop < viewportBottom;
+};
+//   $(document).ready(function(){
+//     var abc=0;
+//     $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//     $(".common_class_custom li:first-child a").parent().addClass("scrolled");
+//     $(window).on( 'scroll', function(){
+//       if ($('#proDesc1').isInanotherViewport()) {
+//          $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//          $(".common_class_custom li:first-child a").parent().addClass("scrolled");
+//          abc=1;
+//       } 
+
+ 
+//        if ($('#techSpec').isInViewport()) {
+//              $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//              $(".common_class_custom li:nth-child(2) a").parent().addClass("scrolled");
+//        }
+
+ 
+//       if ($('#proDesc1mob').isInanotherViewport()) {
+//            $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//            $(".common_class_custom li:first-child a").parent().addClass("scrolled");
+//            abc=1;
+//       } 
+
+//       if ($('#techSpecmob').isInViewport()) {
+//              $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//              $(".common_class_custom li:nth-child(2) a").parent().addClass("scrolled");
+//        } 
+
+      
+//       if ($('#proReview').isInViewport()) {
+//             $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//             $(".common_class_custom li:nth-child(3) a").parent().addClass("scrolled");
+//       }
+//       if(abc==1){
+//         if ($('.section-1 + .section').isInanotherViewport()) {
+//            $(".common_class_custom li a").parent().parent().find(".scrolled").removeClass("scrolled");
+//            $(".common_class_custom li:first-child a").parent().addClass("scrolled");
+//         } 
+//       }
+//     });
+//     $(".whatsapp").click(function(){
+// var now = new Date().valueOf();
+// setTimeout(function () {
+//     if (new Date().valueOf() - now > 100) return;
+//     window.location = "https://itunes.apple.com/us/app/whatsapp-messenger/id310633997?mt=8";
+// }, 25);
+// window.location = "whatsapp://";
+// class ViewController: UIViewController {
+     
+//     @IBAction func sendTextMessageButtonTapped(sender: UIButton) {
+//         let urlString = "Sending WhatsApp message through app in Swift"
+//         let urlStringEncoded = urlString.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())
+//         let url  = NSURL(string: "whatsapp://send?text=\(urlStringEncoded!)")
+         
+//         if UIApplication.sharedApplication().canOpenURL(url!) {
+//             UIApplication.sharedApplication().openURL(url!)
+//         } else {
+//             let errorAlert = UIAlertView(title: "Cannot Send Message", message: "Your device is not able to send WhatsApp messages.", delegate: self, cancelButtonTitle: "OK")
+//             errorAlert.show()
+//         }
+         
+//     }
+// }
+//     });
+//   });
+
+//     var aCont = document.getElementsByClassName('common_class_custom')[0];
+//     var arrA = aCont.getElementsByTagName('a');
+//     Array.prototype.forEach.call(arrA,function(btn){
+//       btn.addEventListener('click',function(e){
+//         Array.prototype.forEach.call(arrA,function(bt){
+//           bt.style.color = "#757579";
+//           if(bt.getElementsByTagName('span')[0]){
+//             bt.getElementsByTagName('span')[0].style.color = "#757579";
+//           }
+//         });
+//         e.target.style.color = "red";
+//         if(e.target.getElementsByTagName('span')[0]){
+//           e.target.getElementsByTagName('span')[0].style.color = "red";
+//         }
+//       });
+//     });
+ 
+</script>
+
+
+
+ {% comment %} <script>
+  $(document).ready(function(){
+    $('.common_class_custom li a').click(function(e){
+      e.preventDefault(); // prevents jump, optional
+      $('.common_class_custom li a').removeClass("tab_active");
+      $(this).addClass("tab_active");
+    });
+  });
+</script> {% endcomment %}
+
+
+
+ <script>
+  // Wait for the HTML document to be fully loaded before running the script.
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // Select all the tab links within elements having the 'common_class_custom' class.
+    const tabLinks = document.querySelectorAll('.common_class_custom li a');
+
+    // Define the function that will handle the click event.
+    function handleTabClick(event) {
+      // Prevent the default link behavior, which is to jump to the anchor.
+      event.preventDefault();
+
+      // Loop through all the tab links and remove the 'tab_active' class from each one.
+      tabLinks.forEach(function(link) {
+        link.classList.remove('tab_active');
+      });
+
+      // Add the 'tab_active' class to the specific link that was just clicked.
+      // 'this' refers to the element that triggered the event.
+      this.classList.add('tab_active');
+    }
+
+    // Attach the click event listener to every tab link.
+    tabLinks.forEach(function(link) {
+      link.addEventListener('click', handleTabClick);
+    });
+    
+  });
+</script>
+
+
+
+{% comment %} <script>
+
+
+   $("body").on("click",".button_cart",function(){
+      	$(".ProductForm__AddToCart span").trigger("click");
+     });
+
+
+    </script> {% endcomment %}
+
+
+
+
+
+
+    <script>
+  // Add an event listener to the body for all click events.
+  document.body.addEventListener('click', function(event) {
+    
+    // Check if the element that was clicked, or one of its ancestors,
+    // has the class 'button_cart'.
+    if (event.target.closest('.button_cart')) {
+      
+      // If it does, find the span inside the main product form's add-to-cart button.
+      const mainAddToCartSpan = document.querySelector('.ProductForm__AddToCart span');
+      
+      // As a safeguard, check if that element actually exists before trying to click it.
+      if (mainAddToCartSpan) {
+        // Programmatically trigger a click on the main add-to-cart button.
+        mainAddToCartSpan.click();
+      }
+    }
+  });
+</script>

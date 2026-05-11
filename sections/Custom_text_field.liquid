@@ -1,0 +1,188 @@
+{% assign font_family = section.settings.font_setting %}
+{% assign font_family2 = section.settings.font_setting2 %}
+
+
+<div class="container-footer">
+	<div class="footer_wrapper">
+    	<div class="home-footercontent" id="section_footercontent">
+        	<div class="container">
+            	<div class="desc-wrapper">
+                  {% for block in section.blocks %}
+                	<div class="desc">
+                    	<h2>{{ block.settings.head }}</h2>
+                        <p>{{ block.settings.para }}</p>
+                     </div>
+                  {% endfor %}
+              	</div>
+          	</div>
+      	</div>
+  </div>
+</div>
+
+<style>
+  .container-footer {
+    width: 1370px;
+    max-width: 100%;
+    margin: auto;
+    padding-bottom: 60px !important;
+    padding: 0px 15px;
+}
+  .desc-wrapper .desc {
+    margin: 0 auto;
+    line-height: 1.78;
+    margin-bottom : {{ section.settings.column_gap | append:'px' }};
+}
+  .desc-wrapper .desc h2 {
+    font-size: {{ section.settings.font_size_header | append:'px' }};
+    font-weight : 600;
+    font-family : {{ font_family.family }};
+    color: {{ section.settings.font_color }};
+}
+.desc p {
+    margin-bottom: 0px;
+    font-size : {{ section.settings.font_size | append:'px' }};
+    font-family : {{ font_family2.family}};
+  	color : {{ section.settings.font_color2 }};
+}
+
+@media (max-width : 1200px)
+  {
+  	.container-footer
+    {
+    	max-width :1170px;
+    }
+  }
+  
+@media screen and (min-width: 768px) and (max-width: 1024px)
+  {
+	.container-footer 
+{
+    width: 100%;
+    max-width: 993px;
+}
+  }
+  
+@media (max-width : 767px)
+{
+     .container-footer {
+    width: 100%;
+    max-width: 737px;
+}
+  }
+	
+}
+  @media (max-width : 600px)
+  {
+  	.container-footer
+    {
+    	padding : 0 24px;
+    }
+  }
+  
+</style>
+
+
+
+
+
+
+{% schema %}
+  {
+    "name": "Custom Text",
+    "settings": [
+					{
+						"type" : "header",
+						"content" : "Heading Font Settings"
+					},
+					{
+    					"type": "range",
+    					"id": "font_size_header",
+    					"min":  15,
+    					"max":  35,
+    					"step":  1,
+    					"unit": "px" ,
+    					"label": "Heading Font size",
+    					"default": 28
+    				},
+					{
+        				"type": "font_picker",
+        				"id": "font_setting",
+        				"label": "Heading Font type",
+        				"default": "work_sans_n4"
+      				},
+					{
+  						"type": "color",
+  						"id": "font_color",
+  						"label": "Heading Font color",
+  						"default": "#000"
+					},
+					{
+						"type" : "header",
+						"content" : "Content Font Settings"
+					},
+					{
+    					"type": "range",
+    					"id": "font_size",
+    					"min":  9,
+    					"max":  30,
+    					"step":  1,
+    					"unit": "px" ,
+    					"label": "Content Font size",
+    					"default": 20
+    				},
+					{
+        				"type": "font_picker",
+        				"id": "font_setting2",
+        				"label": "Content Font type",
+        				"default": "serif"
+      				},
+					{
+  						"type": "color",
+  						"id": "font_color2",
+  						"label": "Content Font color",
+  						"default": "#000"
+					},
+					{
+						"type": "range",
+    					"id": "column_gap",
+    					"min":  20,
+    					"max":  100,
+    					"step":  5,
+    					"unit": "px" ,
+    					"label": "Column Gap",
+    					"default": 20
+					}
+	
+				],
+	"blocks": [
+            {
+              "type": "first-section",
+              "name": "Block",
+              "settings": [
+                  {
+                  "id": "head",
+                  "type": "text",
+                  "label": "Heading"
+                  },
+				  {
+                  "id": "para",
+                  "type": "richtext",
+                  "label": "Content"
+                  }
+              ]
+            }
+			],
+	"presets": [
+    {
+      "category": "custom text",
+      "name": "Text Section"
+    }
+  				]
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

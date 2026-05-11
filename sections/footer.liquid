@@ -1,0 +1,593 @@
+{%- comment -%}
+  This code combines the dynamic block structure of the original theme footer
+  with the custom styling and mobile accordion functionality.
+  A new, fully customizable 'contacts' block has been added.
+{%- endcomment -%}
+
+{%- if template.name == 'page' or template.name == 'blog' or template == 'customers/account' or template == 'customers/order' or template == 'customers/addresses' -%}
+  {%- assign add_top_margin = true -%}
+{%- else -%}
+  {%- assign add_top_margin = false -%}
+{%- endif -%}
+
+{%- if template == 'page.collections' -%}
+  {%- assign add_top_margin = false -%}
+{%- endif -%}
+
+<footer id="section-{{ section.id }}" class="footer {% if add_top_margin %}Footer--withMargin{% endif %}" role="contentinfo">
+  <div class="footer-top">
+    {%- comment -%}
+      First, we find and render the 'text' block which acts as the brand section.
+    {%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'text' -%}
+        <div class="footer-brand" {{ block.shopify_attributes }}>
+          {%- if block.settings.title != blank -%}
+            <h4 class="Footer__Title Heading u-h6">{{ block.settings.title | escape }}</h4>
+          {%- endif -%}
+
+          {%- if block.settings.content != blank -%}
+            <div class="Footer__Content Rte">
+              {{ block.settings.content }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%}
+      Next, we wrap the remaining 'links' and 'contacts' blocks in the columns container.
+    {%- endcomment -%}
+    <div class="footer-columns">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'links' -%}
+            {%- assign linklist = linklists[block.settings.menu] -%}
+
+            {%- if linklist != empty -%}
+              <div class="footer-column" {{ block.shopify_attributes }}>
+                <h4>{{ linklist.title | escape }}</h4>
+
+                <ul class="Linklist">
+                  {%- for link in linklist.links -%}
+                    <li class="Linklist__Item">
+                      <a href="{{ link.url }}" class="Link-Link--primary">{{ link.title | escape }}</a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+          {%- when 'contacts' -%}
+            <div class="footer-column" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <h4>{{ block.settings.title | escape }}</h4>
+              {%- endif -%}
+              <ul>
+                {%- if block.settings.phone != blank -%}
+                  <li>{{ block.settings.phone }}</li>
+                {%- endif -%}
+                {%- if block.settings.hours != blank -%}
+                  <li>{{ block.settings.hours | newline_to_br }}</li>
+                {%- endif -%}
+                {%- if block.settings.email != blank -%}
+                  <li><a href="mailto:{{ block.settings.email }}">{{ block.settings.email }}</a></li>
+                {%- endif -%}
+                {%- if block.settings.address != blank -%}
+                  <li>{{ block.settings.address }}</li>
+                {%- endif -%}
+              </ul>
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    {%- comment -%} Payment Methods Section {%- endcomment -%}
+    <div class="payment-section">
+      {%- if section.settings.show_payment_methods -%}
+        <p>Payment Available</p>
+        {%- capture payment_methods -%}
+          {%- for type in shop.enabled_payment_types -%}
+            <li class="HorizontalList__Item">{{ type | payment_type_svg_tag }}</li>
+          {%- endfor -%}
+        {%- endcapture -%}
+
+        {%- if payment_methods != blank -%}
+          <ul class="payment-icons">
+            {{ payment_methods }}
+          </ul>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Social Media Section {%- endcomment -%}
+    <div class="social-section">
+      <p>Join Our Social Media</p>
+      {% include 'social-media', class: 'social-links' %}
+    </div>
+  </div>
+
+  {% comment %} <div class="footer-legal">
+    <p>© {{ 'now' | date: "%Y" }} {{ shop.name }}. {{ 'footer.general.credits_html' | t: powered_by_link: powered_by_link }}</p>
+    <div class="legal-links">
+      {%- assign legal_menu = linklists.footer -%}
+      {%- for link in legal_menu.links -%}
+        <a href="{{ link.url }}"><span>{{ link.title }}</span></a>
+      {%- endfor -%}
+    </div>
+  </div> {% endcomment %}
+</footer>
+
+<style>
+.footer {
+  background: #141414;
+
+  font-family: sans-serif;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.footer.Footer--withMargin {
+  margin-top: 50px; /* Or your desired margin value */
+}
+
+.footer * {
+  box-sizing: border-box;
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  border-bottom: 1px solid #333;
+  width: 100%;
+
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.footer-brand {
+  flex: 1;
+}
+
+.footer-brand .Footer__Title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 15px 0;
+}
+
+.footer-brand .Rte p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer-columns {
+  display: flex;
+  flex: 2;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-end;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 150px;
+}
+
+.footer-column h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  word-wrap: break-word;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+.footer-column ul li,
+.footer-column ul li a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.footer-column ul li a:hover {
+  color: #fff; /* Makes the link text fully white on hover */
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 20px;
+  border-bottom: 1px solid #333;
+  flex-wrap: wrap;
+  gap: 20px;
+
+  margin: 0 auto;
+}
+
+.footer-bottom p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 10px 0;
+  font-size: 13px;
+}
+
+.payment-section {
+  flex: 1;
+  min-width: 150px;
+}
+
+.social-section {
+  flex: 1;
+  min-width: 150px;
+  text-align: right;
+}
+
+.payment-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.payment-icons .HorizontalList__Item {
+  height: 24px;
+  width: auto;
+}
+.payment-icons .payment-type-svg-tag {
+  height: 100%;
+  width: auto;
+}
+
+.social-links {
+  display: flex;
+  color:white;
+  gap: 15px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.social-links .SocialMedia__Link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: auto;
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.social-links .SocialMedia__Link .Icon {
+  height: 24px;
+  width: auto;
+  vertical-align: middle;
+  transition: filter 0.2s ease;
+  filter: brightness(0) invert(1);
+}
+
+.social-links .SocialMedia__Link:hover .Icon {
+  filter: brightness(0) invert(1) brightness(1.2);
+}
+
+.footer-legal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 25px 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  margin: 0 auto;
+}
+
+.footer-legal p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  word-wrap: break-word;
+}
+
+.legal-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.legal-links a {
+  text-decoration: none;
+}
+
+.legal-links span {
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.legal-links a:hover span {
+  color: gray;
+}
+
+.supports-hover .Link--primary:hover{
+color: #00aeef;
+}
+
+
+@media (max-width: 748px) {
+  .footer-top {
+    flex-direction: column;
+    padding: 30px 15px;
+    gap: 30px;
+  }
+
+  .footer-brand {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .footer-columns {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .footer-column {
+    min-width: 100%;
+    border-bottom: 1px solid #333;
+  }
+  .footer-column:last-child {
+      border-bottom: none;
+  }
+
+  .footer-column h4 {
+    padding: 15px 0;
+    margin-bottom: 0;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .footer-column h4::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .footer-column ul {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding-bottom: 0;
+  }
+
+  .footer-column.active ul {
+    max-height: 500px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .footer-column.active h4::after {
+    transform: rotate(180deg);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 25px;
+    padding: 25px 15px;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .payment-section,
+  .social-section {
+    width: 100%;
+    text-align: left;
+  }
+
+  .payment-icons {
+    justify-content: flex-start;
+  }
+
+  .payment-icons .HorizontalList__Item {
+    height: 20px;
+  }
+
+  .social-links {
+    justify-content: flex-start;
+    gap: 12px;
+    color: white;
+  }
+
+  .footer-legal {
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px 15px;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .legal-links {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .Linklist__Item a:hover{
+    color:white;
+  }
+  .Link Link--primary:hover{
+    color:white
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const footerColumns = document.querySelectorAll('.footer-column');
+  const mobileBreakpoint = 748;
+ function setupAccordion() {
+    footerColumns.forEach(column => {
+      const header = column.querySelector('h4');
+      if (header) {
+        header.removeEventListener('click', toggleColumn);
+        if (window.innerWidth <= mobileBreakpoint) {
+          header.addEventListener('click', toggleColumn);
+          column.classList.remove('active');
+        } else {
+          // On desktop, ensure lists are visible and not in an accordion state
+          column.classList.remove('active');
+          const ul = column.querySelector('ul');
+          if (ul) {
+            ul.style.maxHeight = ''; 
+          }
+        }
+      }
+    });
+  }
+
+  function toggleColumn() {
+    const clickedColumn = this.closest('.footer-column');
+    const wasActive = clickedColumn.classList.contains('active');
+    
+
+    footerColumns.forEach(otherColumn => {
+      if (otherColumn !== clickedColumn) {
+        otherColumn.classList.remove('active');
+      }
+    });
+
+    if (!wasActive) {
+      clickedColumn.classList.add('active');
+    }
+  }
+
+  setupAccordion();
+
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(setupAccordion, 250);
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Footer",
+  "class": "shopify-section--footer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_payment_methods",
+      "label": "Show payment methods",
+      "info": "Payment method icons are automatically displayed based on your Shopify payment methods.",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text / Brand",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "About the shop"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>Use this text area to tell your customers about your brand and vision. You can change it in the theme settings.</p>"
+        }
+      ]
+    },
+    {
+      "type": "links",
+      "name": "Links",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "This menu won't show dropdown items."
+        }
+      ]
+    },
+    {
+      "type": "contacts",
+      "name": "Contacts",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Contacts"
+        },
+        {
+          "type": "text",
+          "id": "phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "textarea",
+          "id": "hours",
+          "label": "Operating Hours"
+        },
+        {
+          "type": "text",
+          "id": "email",
+          "label": "Email Address"
+        },
+        {
+          "type": "text",
+          "id": "address",
+          "label": "Address"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      {
+        "type": "text"
+      },
+      {
+        "type": "links",
+        "settings": {
+          "menu": "footer"
+        }
+      },
+      {
+        "type": "contacts"
+      }
+    ]
+  }
+}
+{% endschema %}
