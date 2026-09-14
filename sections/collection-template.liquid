@@ -706,7 +706,7 @@ margin-bottom:10px;
   {%- comment -%}This is the common part to both template{%- endcomment -%}
 
   <div class="tab-wrapper">      
-    {% render 'tabs-with-sort' with collection: collection, section:section %}
+    {% render 'tabs-with-sort' with collection, collection: collection, section: section %}
   </div>
 
   {%- if collection.products_count > 0 -%}
@@ -1088,4 +1088,14 @@ margin-bottom:10px;
   @media screen and (min-width : 767px){
     .CollectionMain{ padding-bottom: 50px !important; }
   }
-</style>
+</style>{%- comment -%}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{% render 'tabs-with-sort' with collection: collection, section:section %}"
+  to: "{% render 'tabs-with-sort' with collection, collection: collection, section:
+    section %}"
+  position: 29673..29760
+{%- endcomment -%}
